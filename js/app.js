@@ -14,7 +14,6 @@ const outputFilename = document.getElementById('outputFilename');
 document.addEventListener('DOMContentLoaded', () => {
     i18n.init();
     initTheme();
-    initPrivacyDetails();
 
     // Language selector
     document.getElementById('langSelect').addEventListener('change', e => i18n.set(e.target.value));
@@ -257,10 +256,3 @@ function toggleTheme() {
     localStorage.setItem('app-theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
 }
 
-// Initialize privacy details - open by default on desktop
-function initPrivacyDetails() {
-    const privacyDetails = document.getElementById('privacyDetails');
-    if (privacyDetails && window.innerWidth >= 1024) {
-        privacyDetails.open = true;
-    }
-}
