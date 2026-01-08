@@ -13,8 +13,8 @@
         "hint": "Anade al menos 2 archivos."
     },
     "privacy": {
-        "badge": "SOLO EN SU DISPOSITIVO",
-        "title": "100% PRIVACIDAD - Se ejecuta en SU Dispositivo",
+        "badge": "Solo en Su Dispositivo",
+        "title": "100% Privacidad",
         "description": "Sus PDFs se procesan EXCLUSIVAMENTE en este dispositivo. Los archivos NUNCA salen de su ordenador. No se necesita conexion a Internet despues de cargar la pagina.",
         "whatDoesntHappen": "Lo que NO sucede:",
         "noUpload": "Sin Subida",

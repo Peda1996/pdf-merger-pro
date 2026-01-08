@@ -13,8 +13,8 @@
         "hint": "Adicione pelo menos 2 arquivos."
     },
     "privacy": {
-        "badge": "APENAS NO SEU DISPOSITIVO",
-        "title": "100% PRIVACIDADE - Funciona no SEU Dispositivo",
+        "badge": "Apenas no Seu Dispositivo",
+        "title": "100% Privacidade",
         "description": "Seus PDFs sao processados EXCLUSIVAMENTE neste dispositivo. Os arquivos NUNCA saem do seu computador. Nao e necessaria conexao com a Internet apos o carregamento.",
         "whatDoesntHappen": "O que NAO acontece:",
         "noUpload": "Sem Upload",

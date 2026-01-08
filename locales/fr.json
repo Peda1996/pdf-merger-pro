@@ -13,8 +13,8 @@
         "hint": "Ajoutez au moins 2 fichiers."
     },
     "privacy": {
-        "badge": "VOTRE APPAREIL UNIQUEMENT",
-        "title": "100% CONFIDENTIALITE - Fonctionne sur VOTRE Appareil",
+        "badge": "Votre Appareil Uniquement",
+        "title": "100% Confidentiel",
         "description": "Vos PDFs sont traites EXCLUSIVEMENT sur cet appareil. Les fichiers ne quittent JAMAIS votre ordinateur. Aucune connexion Internet requise apres le chargement.",
         "whatDoesntHappen": "Ce qui NE SE PASSE PAS:",
         "noUpload": "Pas de Telechargement",

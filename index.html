@@ -107,76 +107,69 @@
                     </button>
                     <p class="mt-2 text-xs text-center text-gray-500 dark:text-gray-400" data-i18n="settings.hint">Add at least 2 files to merge.</p>
 
-                    <!-- Privacy Banner - MAXIMUM EMPHASIS -->
-                    <div class="mt-6 privacy-banner privacy-pulse bg-gradient-to-br from-green-100 via-emerald-50 to-green-100 dark:from-green-900/40 dark:via-emerald-900/30 dark:to-green-900/40 border-3 border-green-500 dark:border-green-500 rounded-2xl p-5 relative shadow-lg shadow-green-200 dark:shadow-green-900/50">
-                        <!-- Badge -->
-                        <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-                            <span data-i18n="privacy.badge">YOUR DEVICE ONLY</span>
-                        </div>
-
-                        <!-- Device Icon with Shield -->
-                        <div class="flex justify-center mt-3 mb-4">
-                            <div class="relative">
-                                <div class="w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl flex items-center justify-center shadow-lg">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                    <!-- Privacy Banner - Collapsible (open by default on desktop) -->
+                    <details id="privacyDetails" class="mt-6 group">
+                        <summary class="cursor-pointer list-none bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/40 dark:to-emerald-900/40 border-2 border-green-400 dark:border-green-600 rounded-xl p-4 flex items-center justify-between hover:shadow-md transition-all">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-gradient-to-br from-green-400 to-emerald-500 rounded-xl flex items-center justify-center shadow-md">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
                                 </div>
-                                <div class="absolute -bottom-1 -right-1 w-7 h-7 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center shadow-md border-2 border-green-500">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-green-600"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+                                <div>
+                                    <h3 class="text-sm font-bold text-green-800 dark:text-green-300" data-i18n="privacy.title">100% Privacy Secure</h3>
+                                    <p class="text-xs text-green-600 dark:text-green-400" data-i18n="privacy.badge">Your Device Only</p>
                                 </div>
                             </div>
-                        </div>
+                            <svg class="w-5 h-5 text-green-600 dark:text-green-400 transition-transform group-open:rotate-180" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                        </summary>
 
-                        <h3 class="text-lg font-black text-green-800 dark:text-green-300 mb-2 text-center" data-i18n="privacy.title">
-                            100% DATENSCHUTZ - Runs on YOUR Device
-                        </h3>
+                        <div class="mt-2 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 border-2 border-t-0 border-green-400 dark:border-green-600 rounded-b-xl p-4 -mt-2 pt-4">
+                            <p class="text-sm text-green-700 dark:text-green-400 leading-relaxed text-center mb-4" data-i18n="privacy.description">
+                                Your PDFs are processed EXCLUSIVELY on this device. Files NEVER leave your computer. No internet connection needed after page load.
+                            </p>
 
-                        <p class="text-sm text-green-700 dark:text-green-400 leading-relaxed text-center font-medium" data-i18n="privacy.description">
-                            Your PDFs are processed EXCLUSIVELY on this device. Files NEVER leave your computer. No internet connection needed after page load.
-                        </p>
+                            <!-- Visual: What DOESN'T happen -->
+                            <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-3 mb-3">
+                                <p class="text-xs font-bold text-red-700 dark:text-red-400 mb-2 text-center" data-i18n="privacy.whatDoesntHappen">What DOESN'T happen:</p>
+                                <div class="flex flex-wrap justify-center gap-2">
+                                    <span class="inline-flex items-center gap-1 text-xs bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 px-2 py-1 rounded-full">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                                        <span data-i18n="privacy.noUpload">No Upload</span>
+                                    </span>
+                                    <span class="inline-flex items-center gap-1 text-xs bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 px-2 py-1 rounded-full">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                                        <span data-i18n="privacy.noServer">No Server</span>
+                                    </span>
+                                    <span class="inline-flex items-center gap-1 text-xs bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 px-2 py-1 rounded-full">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                                        <span data-i18n="privacy.noCloud">No Cloud</span>
+                                    </span>
+                                    <span class="inline-flex items-center gap-1 text-xs bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 px-2 py-1 rounded-full">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                                        <span data-i18n="privacy.noTracking">No Tracking</span>
+                                    </span>
+                                </div>
+                            </div>
 
-                        <!-- Visual: What DOESN'T happen -->
-                        <div class="mt-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-3">
-                            <p class="text-xs font-bold text-red-700 dark:text-red-400 mb-2 text-center" data-i18n="privacy.whatDoesntHappen">What DOESN'T happen:</p>
-                            <div class="flex flex-wrap justify-center gap-2">
-                                <span class="inline-flex items-center gap-1.5 text-xs bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 px-2.5 py-1.5 rounded-full font-medium">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
-                                    <span data-i18n="privacy.noUpload">No Upload</span>
-                                </span>
-                                <span class="inline-flex items-center gap-1.5 text-xs bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 px-2.5 py-1.5 rounded-full font-medium">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
-                                    <span data-i18n="privacy.noServer">No Server</span>
-                                </span>
-                                <span class="inline-flex items-center gap-1.5 text-xs bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 px-2.5 py-1.5 rounded-full font-medium">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
-                                    <span data-i18n="privacy.noCloud">No Cloud</span>
-                                </span>
-                                <span class="inline-flex items-center gap-1.5 text-xs bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 px-2.5 py-1.5 rounded-full font-medium">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
-                                    <span data-i18n="privacy.noTracking">No Tracking</span>
-                                </span>
+                            <!-- Visual: What DOES happen -->
+                            <div class="bg-green-100 dark:bg-green-900/30 border border-green-300 dark:border-green-700 rounded-xl p-3">
+                                <p class="text-xs font-bold text-green-700 dark:text-green-400 mb-2 text-center" data-i18n="privacy.whatHappens">What DOES happen:</p>
+                                <div class="flex flex-wrap justify-center gap-2">
+                                    <span class="inline-flex items-center gap-1 text-xs bg-green-200 dark:bg-green-800/50 text-green-800 dark:text-green-200 px-2 py-1 rounded-full">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                        <span data-i18n="privacy.localProcessing">Local Processing</span>
+                                    </span>
+                                    <span class="inline-flex items-center gap-1 text-xs bg-green-200 dark:bg-green-800/50 text-green-800 dark:text-green-200 px-2 py-1 rounded-full">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                        <span data-i18n="privacy.staysOnDevice">Stays on Device</span>
+                                    </span>
+                                    <span class="inline-flex items-center gap-1 text-xs bg-green-200 dark:bg-green-800/50 text-green-800 dark:text-green-200 px-2 py-1 rounded-full">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                        <span data-i18n="privacy.worksOffline">Works Offline</span>
+                                    </span>
+                                </div>
                             </div>
                         </div>
-
-                        <!-- Visual: What DOES happen -->
-                        <div class="mt-3 bg-green-100 dark:bg-green-900/30 border border-green-300 dark:border-green-700 rounded-xl p-3">
-                            <p class="text-xs font-bold text-green-700 dark:text-green-400 mb-2 text-center" data-i18n="privacy.whatHappens">What DOES happen:</p>
-                            <div class="flex flex-wrap justify-center gap-2">
-                                <span class="inline-flex items-center gap-1.5 text-xs bg-green-200 dark:bg-green-800/50 text-green-800 dark:text-green-200 px-2.5 py-1.5 rounded-full font-medium">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                                    <span data-i18n="privacy.localProcessing">Local Processing</span>
-                                </span>
-                                <span class="inline-flex items-center gap-1.5 text-xs bg-green-200 dark:bg-green-800/50 text-green-800 dark:text-green-200 px-2.5 py-1.5 rounded-full font-medium">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                                    <span data-i18n="privacy.staysOnDevice">Stays on Device</span>
-                                </span>
-                                <span class="inline-flex items-center gap-1.5 text-xs bg-green-200 dark:bg-green-800/50 text-green-800 dark:text-green-200 px-2.5 py-1.5 rounded-full font-medium">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                                    <span data-i18n="privacy.worksOffline">Works Offline</span>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
+                    </details>
                 </div>
             </div>
 

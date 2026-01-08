@@ -13,8 +13,8 @@
         "hint": "Mindestens 2 Dateien hinzufugen."
     },
     "privacy": {
-        "badge": "NUR AUF IHREM GERAT",
-        "title": "100% DATENSCHUTZ - Lauft auf IHREM Gerat",
+        "badge": "Nur auf Ihrem Gerat",
+        "title": "100% Datenschutz",
         "description": "Ihre PDFs werden AUSSCHLIESSLICH auf diesem Gerat verarbeitet. Dateien verlassen NIEMALS Ihren Computer. Nach dem Laden der Seite ist keine Internetverbindung erforderlich.",
         "whatDoesntHappen": "Was NICHT passiert:",
         "noUpload": "Kein Upload",
