@@ -1,0 +1,44 @@
+{
+    "app": {
+        "title": "PDF Merger Pro",
+        "subtitle": "Secure Local PDF Combiner"
+    },
+    "header": {
+        "clearList": "Clear List"
+    },
+    "settings": {
+        "title": "Merge Options",
+        "outputName": "Output Filename",
+        "mergeAction": "Merge PDFs",
+        "hint": "Add at least 2 files to merge."
+    },
+    "privacy": {
+        "title": "100% Privacy Secure",
+        "description": "Your files NEVER leave this device. All processing happens locally in your browser - no uploads, no servers, no tracking.",
+        "badge": "Local Only"
+    },
+    "dropzone": {
+        "title": "Drop PDF files here",
+        "description": "Drag & drop files or click to browse."
+    },
+    "list": {
+        "title": "Files to Merge",
+        "fileName": "File Name",
+        "pages": "Pages",
+        "order": "Order"
+    },
+    "confirm": {
+        "clearTitle": "Clear all files?",
+        "clearMessage": "This will remove all PDFs from the list.",
+        "confirm": "Yes, clear all",
+        "cancel": "Cancel"
+    },
+    "toast": {
+        "merged": "PDFs merged successfully!",
+        "error": "Error merging PDFs",
+        "added": "File added"
+    },
+    "footer": {
+        "rights": "All rights reserved."
+    }
+}

@@ -1,0 +1,44 @@
+{
+    "app": {
+        "title": "PDF Merger Pro",
+        "subtitle": "Sicherer lokaler PDF-Combiner"
+    },
+    "header": {
+        "clearList": "Liste leeren"
+    },
+    "settings": {
+        "title": "Optionen",
+        "outputName": "Dateiname",
+        "mergeAction": "PDFs zusammenfugen",
+        "hint": "Mindestens 2 Dateien hinzufugen."
+    },
+    "privacy": {
+        "title": "100% Datenschutz",
+        "description": "Ihre Dateien verlassen NIEMALS dieses Gerat. Alle Verarbeitung erfolgt lokal in Ihrem Browser - keine Uploads, keine Server, kein Tracking.",
+        "badge": "Nur Lokal"
+    },
+    "dropzone": {
+        "title": "PDFs hier ablegen",
+        "description": "Dateien ziehen oder klicken."
+    },
+    "list": {
+        "title": "Dateiliste",
+        "fileName": "Dateiname",
+        "pages": "Seiten",
+        "order": "Reihenfolge"
+    },
+    "confirm": {
+        "clearTitle": "Alles loschen?",
+        "clearMessage": "Dies entfernt alle PDFs aus der Liste.",
+        "confirm": "Ja, loschen",
+        "cancel": "Abbrechen"
+    },
+    "toast": {
+        "merged": "PDFs erfolgreich zusammengefugt!",
+        "error": "Fehler beim Zusammenfugen",
+        "added": "Datei hinzugefugt"
+    },
+    "footer": {
+        "rights": "Alle Rechte vorbehalten."
+    }
+}

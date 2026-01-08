@@ -1,0 +1,44 @@
+{
+    "app": {
+        "title": "Unione PDF Pro",
+        "subtitle": "Combinatore PDF locale sicuro"
+    },
+    "header": {
+        "clearList": "Svuota lista"
+    },
+    "settings": {
+        "title": "Opzioni",
+        "outputName": "Nome file",
+        "mergeAction": "Unisci PDF",
+        "hint": "Aggiungi almeno 2 file."
+    },
+    "privacy": {
+        "title": "100% Privacy",
+        "description": "I tuoi file NON lasciano MAI questo dispositivo. Tutta l'elaborazione avviene localmente nel tuo browser - nessun upload, nessun server, nessun tracciamento.",
+        "badge": "Solo Locale"
+    },
+    "dropzone": {
+        "title": "Rilascia i PDF qui",
+        "description": "Trascina o clicca per cercare."
+    },
+    "list": {
+        "title": "File da unire",
+        "fileName": "Nome file",
+        "pages": "Pagine",
+        "order": "Ordine"
+    },
+    "confirm": {
+        "clearTitle": "Cancellare tutto?",
+        "clearMessage": "Rimuovera tutti i PDF dalla lista.",
+        "confirm": "Si, cancella",
+        "cancel": "Annulla"
+    },
+    "toast": {
+        "merged": "PDF uniti con successo!",
+        "error": "Errore unione",
+        "added": "File aggiunto"
+    },
+    "footer": {
+        "rights": "Tutti i diritti riservati."
+    }
+}

@@ -1,0 +1,44 @@
+{
+    "app": {
+        "title": "Fusionar PDF Pro",
+        "subtitle": "Combinador de PDF local seguro"
+    },
+    "header": {
+        "clearList": "Limpiar lista"
+    },
+    "settings": {
+        "title": "Opciones",
+        "outputName": "Nombre de archivo",
+        "mergeAction": "Fusionar PDFs",
+        "hint": "Anade al menos 2 archivos."
+    },
+    "privacy": {
+        "title": "100% Privacidad",
+        "description": "Sus archivos NUNCA salen de este dispositivo. Todo el procesamiento ocurre localmente en su navegador - sin subidas, sin servidores, sin seguimiento.",
+        "badge": "Solo Local"
+    },
+    "dropzone": {
+        "title": "Suelta los PDF aqui",
+        "description": "Arrastra o haz clic para buscar."
+    },
+    "list": {
+        "title": "Archivos a unir",
+        "fileName": "Nombre",
+        "pages": "Paginas",
+        "order": "Orden"
+    },
+    "confirm": {
+        "clearTitle": "Borrar todo?",
+        "clearMessage": "Esto eliminara todos los PDF de la lista.",
+        "confirm": "Si, borrar",
+        "cancel": "Cancelar"
+    },
+    "toast": {
+        "merged": "PDFs fusionados con exito!",
+        "error": "Error al fusionar",
+        "added": "Archivo anadido"
+    },
+    "footer": {
+        "rights": "Todos los derechos reservados."
+    }
+}

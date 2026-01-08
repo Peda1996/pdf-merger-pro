@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Merger Pro - Secure Local Tool</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+
+    <!-- PDF Lib for client-side processing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <!-- FileSaver for downloads -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-gray-50 dark:bg-slate-900 text-gray-800 dark:text-gray-200 font-sans min-h-screen flex flex-col transition-colors duration-300">
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Header -->
+    <header class="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 sticky top-0 z-10 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-gradient-to-br from-red-600 to-rose-600 rounded-lg text-white shadow-lg">
+                    <!-- PDF Icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M8 13h2"/><path d="M8 17h2"/><path d="M14 13h2"/></svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-gray-900 dark:text-white leading-tight"><span data-i18n="app.title">PDF Merger Pro</span></h1>
+                    <p class="text-xs text-gray-500 dark:text-gray-400" data-i18n="app.subtitle">Secure Local PDF Combiner</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <!-- Theme Toggle -->
+                <div class="flex items-center gap-1.5 mr-2">
+                    <svg class="w-4 h-4 text-amber-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                    <button id="themeToggle" class="theme-toggle" title="Toggle theme (T)"></button>
+                    <svg class="w-4 h-4 text-indigo-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                </div>
+
+                <!-- Language Selector -->
+                <div class="relative">
+                    <select id="langSelect" class="appearance-none bg-gray-100 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 text-gray-700 dark:text-gray-200 text-sm rounded-lg px-3 py-2 pr-8 cursor-pointer hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors focus:ring-red-500 focus:border-red-500">
+                        <option value="en">EN</option>
+                        <option value="de">DE</option>
+                        <option value="fr">FR</option>
+                        <option value="es">ES</option>
+                        <option value="it">IT</option>
+                        <option value="pt">PT</option>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                </div>
+
+                <button id="clearAllBtn" class="hidden md:flex items-center gap-2 px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-sm font-medium transition-colors" title="Clear list (Del)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                    <span data-i18n="header.clearList">Clear List</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div id="progressBar" class="h-1 bg-gray-200 dark:bg-slate-700 hidden">
+            <div id="progressFill" class="h-full bg-red-600 transition-all duration-300 ease-out" style="width: 0%"></div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow p-4 md:p-6 max-w-7xl mx-auto w-full">
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+
+            <!-- Sidebar / Action Panel -->
+            <div class="lg:col-span-4 space-y-4">
+                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-5 sticky top-24">
+                    <h2 class="font-semibold text-gray-900 dark:text-white flex items-center gap-2 mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                        <span data-i18n="settings.title">Merge Options</span>
+                    </h2>
+
+                    <!-- Filename Input -->
+                    <div class="mb-5">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" data-i18n="settings.outputName">Output Filename</label>
+                        <div class="relative">
+                            <input type="text" id="outputFilename" value="merged-document" class="w-full bg-gray-50 dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block p-2.5 pr-12">
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                <span class="text-gray-500 dark:text-gray-400 text-sm">.pdf</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Merge Action -->
+                    <button id="mergeBtn" disabled class="w-full py-3.5 px-4 bg-red-600 hover:bg-red-700 disabled:bg-gray-300 dark:disabled:bg-slate-700 disabled:cursor-not-allowed text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 group">
+                        <svg class="w-5 h-5 group-hover:scale-110 transition-transform" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                        <span data-i18n="settings.mergeAction">Merge PDFs</span>
+                    </button>
+                    <p class="mt-2 text-xs text-center text-gray-500 dark:text-gray-400" data-i18n="settings.hint">Add at least 2 files to merge.</p>
+
+                    <!-- Privacy Banner - HIGHLIGHTED -->
+                    <div class="mt-6 privacy-banner privacy-pulse bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 border-2 border-green-400 dark:border-green-600 rounded-xl p-5 relative">
+                        <!-- Badge -->
+                        <div class="absolute -top-3 left-4 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+                            <span data-i18n="privacy.badge">Local Only</span>
+                        </div>
+
+                        <h3 class="text-base font-bold text-green-800 dark:text-green-300 mb-2 flex items-center gap-2 mt-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-green-600 dark:text-green-400"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+                            <span data-i18n="privacy.title">100% Privacy Secure</span>
+                        </h3>
+                        <p class="text-sm text-green-700 dark:text-green-400 leading-relaxed" data-i18n="privacy.description">
+                            Your files NEVER leave this device. All processing happens locally in your browser - no uploads, no servers, no tracking.
+                        </p>
+
+                        <!-- Trust indicators -->
+                        <div class="mt-3 flex flex-wrap gap-2">
+                            <span class="inline-flex items-center gap-1 text-xs bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200 px-2 py-1 rounded-full">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                No Upload
+                            </span>
+                            <span class="inline-flex items-center gap-1 text-xs bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200 px-2 py-1 rounded-full">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                No Server
+                            </span>
+                            <span class="inline-flex items-center gap-1 text-xs bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200 px-2 py-1 rounded-full">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                No Tracking
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Area -->
+            <div class="lg:col-span-8 flex flex-col h-full space-y-6">
+
+                <!-- Drop Zone -->
+                <div id="dropZone" class="drop-zone bg-white dark:bg-slate-800 rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer min-h-[250px] relative group border-2 border-dashed border-gray-300 dark:border-slate-600 hover:border-red-500 dark:hover:border-red-500">
+                    <input type="file" id="fileInput" multiple accept=".pdf" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" aria-label="Select PDFs">
+
+                    <div class="pointer-events-none transition-transform group-hover:scale-110 duration-300 mb-6 p-5 bg-red-50 dark:bg-red-900/30 rounded-full text-red-600 dark:text-red-400 shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white pointer-events-none mb-2" data-i18n="dropzone.title">Drop PDF files here</h3>
+                    <p class="text-gray-500 dark:text-gray-400 pointer-events-none text-sm max-w-xs mx-auto mb-3">
+                        <span data-i18n="dropzone.description">Drag & drop files or click to browse.</span>
+                    </p>
+                </div>
+
+                <!-- File List Section -->
+                <div id="fileListSection" class="hidden animate-fade-in">
+                    <div class="flex items-center justify-between mb-3">
+                        <h2 class="text-lg font-bold text-gray-900 dark:text-white flex items-center">
+                            <span data-i18n="list.title">Files to Merge</span>
+                            <span id="countBadge" class="ml-2 bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-300 text-xs px-2.5 py-1 rounded-full border border-gray-200 dark:border-slate-600">0</span>
+                        </h2>
+                        <div class="text-sm text-gray-500 dark:text-gray-400" id="totalPageInfo"></div>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm overflow-hidden">
+                        <div class="grid grid-cols-12 bg-gray-50 dark:bg-slate-700/50 border-b border-gray-200 dark:border-slate-700 px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            <div class="col-span-1 text-center">#</div>
+                            <div class="col-span-6 md:col-span-5" data-i18n="list.fileName">File Name</div>
+                            <div class="col-span-3 md:col-span-2 text-center" data-i18n="list.pages">Pages</div>
+                            <div class="col-span-2 md:col-span-4 text-right" data-i18n="list.order">Order</div>
+                        </div>
+                        <div id="resultsList" class="divide-y divide-gray-100 dark:divide-slate-700 max-h-[500px] overflow-y-auto">
+                            <!-- Items will be injected here -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-slate-700 py-6 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center text-sm text-gray-500 dark:text-gray-400">
+            <p>&copy; 2025 PDF Merger Pro. <span data-i18n="footer.rights">All rights reserved.</span></p>
+        </div>
+    </footer>
+
+    <!-- Confirm Modal -->
+    <div id="confirmModal" class="preview-modal" role="dialog" aria-modal="true">
+        <div class="preview-content p-6 max-w-md">
+            <div class="text-center">
+                <div class="mx-auto mb-4 w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-600 dark:text-red-400"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2" data-i18n="confirm.clearTitle">Clear all files?</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-6" data-i18n="confirm.clearMessage">This will remove all PDFs from the list.</p>
+                <div class="flex gap-3 justify-center">
+                    <button id="confirmCancel" class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-lg font-medium transition-colors" data-i18n="confirm.cancel">Cancel</button>
+                    <button id="confirmOk" class="px-4 py-2 text-white bg-red-600 hover:bg-red-700 rounded-lg font-medium transition-colors" data-i18n="confirm.confirm">Yes, clear all</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- List Item Template -->
+    <template id="listItemTemplate">
+        <div class="grid grid-cols-12 px-4 py-3 items-center hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors group">
+            <div class="col-span-1 text-center font-mono text-xs text-gray-400 index-number">1</div>
+            <div class="col-span-6 md:col-span-5 flex items-center gap-3 overflow-hidden">
+                <div class="w-8 h-8 rounded bg-red-100 dark:bg-red-900/20 flex items-center justify-center flex-shrink-0 text-red-600 dark:text-red-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                </div>
+                <div class="min-w-0">
+                    <p class="text-sm font-medium text-gray-900 dark:text-white truncate file-name">doc.pdf</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 truncate file-size">2.4MB</p>
+                </div>
+            </div>
+            <div class="col-span-3 md:col-span-2 text-center text-xs font-mono text-gray-600 dark:text-gray-300 file-pages">
+                ...
+            </div>
+            <div class="col-span-2 md:col-span-4 text-right flex justify-end gap-1">
+                <button class="up-btn p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-slate-600 rounded" title="Move Up">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+                </button>
+                <button class="down-btn p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-slate-600 rounded" title="Move Down">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+                <button class="delete-btn ml-2 p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded" title="Remove">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+        </div>
+    </template>
+
+    <!-- Toast Template -->
+    <template id="toastTemplate">
+        <div class="toast pointer-events-auto bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg shadow-lg p-4 flex items-center gap-3 min-w-[280px] max-w-sm animate-slide-in">
+            <div class="toast-icon flex-shrink-0"></div>
+            <p class="toast-message text-sm text-gray-700 dark:text-gray-300 flex-1"></p>
+            <button class="toast-close text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
+    </template>
+
+    <!-- Scripts -->
+    <script src="js/i18n.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

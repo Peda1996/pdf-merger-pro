@@ -1,0 +1,44 @@
+{
+    "app": {
+        "title": "Fusion PDF Pro",
+        "subtitle": "Combiner PDF localement"
+    },
+    "header": {
+        "clearList": "Vider la liste"
+    },
+    "settings": {
+        "title": "Options",
+        "outputName": "Nom du fichier",
+        "mergeAction": "Fusionner les PDF",
+        "hint": "Ajoutez au moins 2 fichiers."
+    },
+    "privacy": {
+        "title": "100% Confidentiel",
+        "description": "Vos fichiers ne quittent JAMAIS cet appareil. Tout le traitement se fait localement dans votre navigateur - pas de telechargement, pas de serveur, pas de tracking.",
+        "badge": "Local Uniquement"
+    },
+    "dropzone": {
+        "title": "Deposez les PDF ici",
+        "description": "Glissez-deposez ou cliquez."
+    },
+    "list": {
+        "title": "Fichiers a fusionner",
+        "fileName": "Nom du fichier",
+        "pages": "Pages",
+        "order": "Ordre"
+    },
+    "confirm": {
+        "clearTitle": "Tout effacer ?",
+        "clearMessage": "Cela supprimera tous les PDF de la liste.",
+        "confirm": "Oui, effacer",
+        "cancel": "Annuler"
+    },
+    "toast": {
+        "merged": "PDF fusionnes avec succes !",
+        "error": "Erreur de fusion",
+        "added": "Fichier ajoute"
+    },
+    "footer": {
+        "rights": "Tous droits reserves."
+    }
+}

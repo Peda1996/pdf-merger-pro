@@ -1,0 +1,44 @@
+{
+    "app": {
+        "title": "Mesclar PDF Pro",
+        "subtitle": "Combinador de PDF local"
+    },
+    "header": {
+        "clearList": "Limpar lista"
+    },
+    "settings": {
+        "title": "Opcoes",
+        "outputName": "Nome do arquivo",
+        "mergeAction": "Mesclar PDFs",
+        "hint": "Adicione pelo menos 2 arquivos."
+    },
+    "privacy": {
+        "title": "100% Privacidade",
+        "description": "Seus arquivos NUNCA saem deste dispositivo. Todo o processamento acontece localmente no seu navegador - sem uploads, sem servidores, sem rastreamento.",
+        "badge": "Apenas Local"
+    },
+    "dropzone": {
+        "title": "Solte os PDFs aqui",
+        "description": "Arraste ou clique para buscar."
+    },
+    "list": {
+        "title": "Arquivos para unir",
+        "fileName": "Nome",
+        "pages": "Paginas",
+        "order": "Ordem"
+    },
+    "confirm": {
+        "clearTitle": "Limpar tudo?",
+        "clearMessage": "Isso removera todos os PDFs da lista.",
+        "confirm": "Sim, limpar",
+        "cancel": "Cancelar"
+    },
+    "toast": {
+        "merged": "PDFs unidos com sucesso!",
+        "error": "Erro ao mesclar",
+        "added": "Arquivo adicionado"
+    },
+    "footer": {
+        "rights": "Todos os direitos reservados."
+    }
+}
