@@ -2,6 +2,8 @@
 
 A secure, privacy-focused PDF merging tool that runs entirely in your browser.
 
+**[Live Demo](https://peda1996.github.io/pdf-merger-pro/)**
+
 ## Features
 
 - **100% Local Processing**: Your files never leave your device. All PDF processing happens client-side in your browser.

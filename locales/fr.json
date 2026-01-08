@@ -13,9 +13,18 @@
         "hint": "Ajoutez au moins 2 fichiers."
     },
     "privacy": {
-        "title": "100% Confidentiel",
-        "description": "Vos fichiers ne quittent JAMAIS cet appareil. Tout le traitement se fait localement dans votre navigateur - pas de telechargement, pas de serveur, pas de tracking.",
-        "badge": "Local Uniquement"
+        "badge": "VOTRE APPAREIL UNIQUEMENT",
+        "title": "100% CONFIDENTIALITE - Fonctionne sur VOTRE Appareil",
+        "description": "Vos PDFs sont traites EXCLUSIVEMENT sur cet appareil. Les fichiers ne quittent JAMAIS votre ordinateur. Aucune connexion Internet requise apres le chargement.",
+        "whatDoesntHappen": "Ce qui NE SE PASSE PAS:",
+        "noUpload": "Pas de Telechargement",
+        "noServer": "Pas de Serveur",
+        "noCloud": "Pas de Cloud",
+        "noTracking": "Pas de Suivi",
+        "whatHappens": "Ce qui SE PASSE:",
+        "localProcessing": "Traitement Local",
+        "staysOnDevice": "Reste sur l'Appareil",
+        "worksOffline": "Fonctionne Hors Ligne"
     },
     "dropzone": {
         "title": "Deposez les PDF ici",

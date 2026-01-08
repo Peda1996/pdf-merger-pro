@@ -13,9 +13,18 @@
         "hint": "Mindestens 2 Dateien hinzufugen."
     },
     "privacy": {
-        "title": "100% Datenschutz",
-        "description": "Ihre Dateien verlassen NIEMALS dieses Gerat. Alle Verarbeitung erfolgt lokal in Ihrem Browser - keine Uploads, keine Server, kein Tracking.",
-        "badge": "Nur Lokal"
+        "badge": "NUR AUF IHREM GERAT",
+        "title": "100% DATENSCHUTZ - Lauft auf IHREM Gerat",
+        "description": "Ihre PDFs werden AUSSCHLIESSLICH auf diesem Gerat verarbeitet. Dateien verlassen NIEMALS Ihren Computer. Nach dem Laden der Seite ist keine Internetverbindung erforderlich.",
+        "whatDoesntHappen": "Was NICHT passiert:",
+        "noUpload": "Kein Upload",
+        "noServer": "Kein Server",
+        "noCloud": "Keine Cloud",
+        "noTracking": "Kein Tracking",
+        "whatHappens": "Was passiert:",
+        "localProcessing": "Lokale Verarbeitung",
+        "staysOnDevice": "Bleibt auf Gerat",
+        "worksOffline": "Funktioniert Offline"
     },
     "dropzone": {
         "title": "PDFs hier ablegen",

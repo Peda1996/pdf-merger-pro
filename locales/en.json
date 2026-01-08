@@ -13,9 +13,18 @@
         "hint": "Add at least 2 files to merge."
     },
     "privacy": {
-        "title": "100% Privacy Secure",
-        "description": "Your files NEVER leave this device. All processing happens locally in your browser - no uploads, no servers, no tracking.",
-        "badge": "Local Only"
+        "badge": "YOUR DEVICE ONLY",
+        "title": "100% PRIVACY - Runs on YOUR Device",
+        "description": "Your PDFs are processed EXCLUSIVELY on this device. Files NEVER leave your computer. No internet connection needed after page load.",
+        "whatDoesntHappen": "What DOESN'T happen:",
+        "noUpload": "No Upload",
+        "noServer": "No Server",
+        "noCloud": "No Cloud",
+        "noTracking": "No Tracking",
+        "whatHappens": "What DOES happen:",
+        "localProcessing": "Local Processing",
+        "staysOnDevice": "Stays on Device",
+        "worksOffline": "Works Offline"
     },
     "dropzone": {
         "title": "Drop PDF files here",

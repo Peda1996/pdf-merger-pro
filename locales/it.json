@@ -13,9 +13,18 @@
         "hint": "Aggiungi almeno 2 file."
     },
     "privacy": {
-        "title": "100% Privacy",
-        "description": "I tuoi file NON lasciano MAI questo dispositivo. Tutta l'elaborazione avviene localmente nel tuo browser - nessun upload, nessun server, nessun tracciamento.",
-        "badge": "Solo Locale"
+        "badge": "SOLO SUL TUO DISPOSITIVO",
+        "title": "100% PRIVACY - Funziona sul TUO Dispositivo",
+        "description": "I tuoi PDF vengono elaborati ESCLUSIVAMENTE su questo dispositivo. I file NON lasciano MAI il tuo computer. Non e necessaria connessione Internet dopo il caricamento.",
+        "whatDoesntHappen": "Cosa NON succede:",
+        "noUpload": "Nessun Caricamento",
+        "noServer": "Nessun Server",
+        "noCloud": "Nessun Cloud",
+        "noTracking": "Nessun Tracciamento",
+        "whatHappens": "Cosa succede:",
+        "localProcessing": "Elaborazione Locale",
+        "staysOnDevice": "Rimane sul Dispositivo",
+        "worksOffline": "Funziona Offline"
     },
     "dropzone": {
         "title": "Rilascia i PDF qui",
