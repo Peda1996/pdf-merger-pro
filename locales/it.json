@@ -71,7 +71,7 @@
         "delete": "Elimina",
         "apply": "Applica modifiche",
         "hint": "Clicca sul testo riconosciuto per modificarlo. Trascina per spostare.",
-        "coverNote": "Nota: il testo coperto è nascosto ma resta nel PDF (ancora trovabile con la ricerca)."
+        "coverNote": "Il testo modificato viene rimosso davvero dal PDF all'esportazione."
     },
     "confirm": {
         "clearTitle": "Cancellare tutto?",

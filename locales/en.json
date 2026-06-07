@@ -71,7 +71,7 @@
         "delete": "Delete",
         "apply": "Apply changes",
         "hint": "Click recognized text to edit it. Drag to move; add text or whiteout.",
-        "coverNote": "Note: covered text is hidden, but stays in the PDF (still findable by search)."
+        "coverNote": "Edited text is truly removed from the PDF on export."
     },
     "confirm": {
         "clearTitle": "Clear all files?",
