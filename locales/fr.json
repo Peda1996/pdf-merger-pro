@@ -62,6 +62,15 @@
         "reset": "Réinitialiser",
         "apply": "Appliquer"
     },
+    "edit": {
+        "title": "Modifier le contenu",
+        "addText": "Ajouter du texte",
+        "whiteout": "Masquer",
+        "size": "Taille",
+        "delete": "Supprimer",
+        "apply": "Appliquer les modifications",
+        "hint": "Glissez pour déplacer. Le masque couvre, le texte s'ajoute."
+    },
     "confirm": {
         "clearTitle": "Tout effacer ?",
         "clearMessage": "Cela supprimera tous les fichiers de la liste.",
@@ -75,6 +84,7 @@
         "error": "Erreur de fusion",
         "added": "Fichier ajouté",
         "cropped": "Image recadrée",
+        "edited": "Modifications appliquées",
         "unsupported": "Type de fichier non pris en charge",
         "previewError": "Impossible de charger l'aperçu"
     },

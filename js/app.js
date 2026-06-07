@@ -36,6 +36,15 @@ const cropModal = document.getElementById('cropModal');
 const cropImage = document.getElementById('cropImage');
 const aspectGroup = document.getElementById('aspectGroup');
 
+// Edit modal refs
+const editModal = document.getElementById('editModal');
+const editBgImg = document.getElementById('editBgImg');
+const editOverlay = document.getElementById('editOverlay');
+const editFontSize = document.getElementById('editFontSize');
+const editColor = document.getElementById('editColor');
+const editNav = document.getElementById('editNav');
+const editPageInfo = document.getElementById('editPageInfo');
+
 // Transient state
 let previewPdf = null;
 let previewPage = 1;
@@ -47,6 +56,12 @@ let cropFileId = null;
 let cropFlipX = 1;
 let cropFlipY = 1;
 let dragSrcIndex = null;
+
+// Content editor state
+let editFileId = null;
+let editPages = [];          // [{ src, annos: [] }]
+let editPageIndex = 0;
+let selectedAnno = null;
 
 const PDF_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
 const DOCX_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/><line x1="9" y1="9" x2="11" y2="9"/></svg>';
@@ -127,6 +142,41 @@ document.addEventListener('DOMContentLoaded', () => {
             setActiveAspect(btn.dataset.ratio);
             if (cropper) cropper.setAspectRatio(btn.dataset.ratio === 'free' ? NaN : parseFloat(btn.dataset.ratio));
         });
+    });
+
+    // Edit modal wiring
+    document.getElementById('editClose').addEventListener('click', closeEditor);
+    document.getElementById('editCancel').addEventListener('click', closeEditor);
+    document.getElementById('editApply').addEventListener('click', applyEdits);
+    document.getElementById('addTextBtn').addEventListener('click', () => {
+        const dw = editBgImg.clientWidth || 400, dh = editBgImg.clientHeight || 300;
+        const el = createTextEl({ left: dw * 0.3, top: dh * 0.42, text: 'Text', fontSize: parseFloat(editFontSize.value) || 20, color: editColor.value });
+        selectAnno(el);
+        el.focus();
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+    });
+    document.getElementById('addWhiteoutBtn').addEventListener('click', () => {
+        const dw = editBgImg.clientWidth || 400, dh = editBgImg.clientHeight || 300;
+        const el = createWhiteoutEl({ left: dw * 0.3, top: dh * 0.42, width: dw * 0.28, height: dh * 0.06 });
+        selectAnno(el);
+    });
+    editFontSize.addEventListener('change', () => {
+        if (selectedAnno && selectedAnno.dataset.type === 'text') selectedAnno.style.fontSize = editFontSize.value + 'px';
+    });
+    editColor.addEventListener('input', () => {
+        if (selectedAnno && selectedAnno.dataset.type === 'text') selectedAnno.style.color = editColor.value;
+    });
+    document.getElementById('editDeleteSel').addEventListener('click', () => {
+        if (selectedAnno) { selectedAnno.remove(); selectedAnno = null; }
+    });
+    document.getElementById('editPrev').addEventListener('click', () => gotoEditPage(-1));
+    document.getElementById('editNext').addEventListener('click', () => gotoEditPage(1));
+    editOverlay.addEventListener('mousedown', (e) => {
+        if (e.target === editOverlay && selectedAnno) { selectedAnno.classList.remove('selected'); selectedAnno = null; }
     });
 
     // Escape closes modals
@@ -440,6 +490,7 @@ function renderItem(file, index) {
     const thumbIcon = clone.querySelector('.thumb-icon');
     const meta = clone.querySelector('.file-meta');
     const cropBtn = clone.querySelector('.crop-btn');
+    const editBtn = clone.querySelector('.edit-btn');
     const previewBtn = clone.querySelector('.preview-btn');
     const thumbBtn = clone.querySelector('.thumb-btn');
     const upBtn = clone.querySelector('.up-btn');
@@ -447,6 +498,7 @@ function renderItem(file, index) {
     const delBtn = clone.querySelector('.delete-btn');
 
     thumbImg.setAttribute('draggable', 'false');
+    if (!isEditable(file)) editBtn.classList.add('hidden'); // PDF editing not yet supported
 
     if (file.type === 'image') {
         const dims = `${file.width}×${file.height}`;
@@ -483,6 +535,7 @@ function renderItem(file, index) {
     // Tooltips
     previewBtn.title = i18n.t('list.preview');
     thumbBtn.title = i18n.t('list.preview');
+    editBtn.title = i18n.t('edit.title');
     upBtn.title = i18n.t('list.moveUp');
     downBtn.title = i18n.t('list.moveDown');
     delBtn.title = i18n.t('list.remove');
@@ -495,6 +548,7 @@ function renderItem(file, index) {
     // Actions
     previewBtn.addEventListener('click', () => openPreview(index));
     thumbBtn.addEventListener('click', () => openPreview(index));
+    editBtn.addEventListener('click', () => openEditor(index));
     cropBtn.addEventListener('click', () => openCrop(index));
     upBtn.addEventListener('click', () => moveItem(index, -1));
     downBtn.addEventListener('click', () => moveItem(index, 1));
@@ -738,6 +792,254 @@ function closeCrop() {
     cropFileId = null;
 }
 
+// ---------- Content editor (text + whiteout overlays) ----------
+
+// Which file types currently support the overlay editor.
+function isEditable(file) {
+    return file.type === 'image' || file.type === 'docx' || file.type === 'pptx';
+}
+
+function openEditor(index) {
+    const file = appFiles[index];
+    if (!file || !isEditable(file)) return;
+    editFileId = file.id;
+    selectedAnno = null;
+
+    if (file.type === 'image') {
+        editPages = [{ src: file.currentSrc, annos: [] }];
+    } else {
+        editPages = file.pages.map(p => ({ src: p.png, annos: [] }));
+    }
+    editPageIndex = 0;
+
+    document.getElementById('editTitle').textContent = file.name;
+    editModal.classList.add('active');
+    const multi = editPages.length > 1;
+    editNav.classList.toggle('hidden', !multi);
+    editNav.classList.toggle('flex', multi);
+    showEditPage(0);
+}
+
+function showEditPage(i) {
+    editPageIndex = i;
+    selectedAnno = null;
+    editOverlay.innerHTML = '';
+    editPageInfo.textContent = `${i + 1} / ${editPages.length}`;
+    document.getElementById('editPrev').disabled = i <= 0;
+    document.getElementById('editNext').disabled = i >= editPages.length - 1;
+
+    editBgImg.onload = () => {
+        const dw = editBgImg.clientWidth || editBgImg.naturalWidth;
+        const dh = editBgImg.clientHeight || editBgImg.naturalHeight;
+        editOverlay.style.width = dw + 'px';
+        editOverlay.style.height = dh + 'px';
+        (editPages[i].annos || []).forEach(a => {
+            if (a.type === 'text') {
+                createTextEl({ left: a.leftPct * dw, top: a.topPct * dh, text: a.text, fontSize: a.fontPct * dh, color: a.color });
+            } else {
+                createWhiteoutEl({ left: a.leftPct * dw, top: a.topPct * dh, width: a.wPct * dw, height: a.hPct * dh });
+            }
+        });
+    };
+    editBgImg.src = editPages[i].src;
+    if (editBgImg.complete && editBgImg.naturalWidth) editBgImg.onload();
+}
+
+function gotoEditPage(delta) {
+    const next = editPageIndex + delta;
+    if (next < 0 || next >= editPages.length) return;
+    serializeEditPage();
+    showEditPage(next);
+}
+
+function createTextEl(data) {
+    const el = document.createElement('div');
+    el.className = 'anno anno-text';
+    el.contentEditable = 'true';
+    el.spellcheck = false;
+    el.dataset.type = 'text';
+    el.textContent = data.text != null ? data.text : 'Text';
+    el.style.left = (data.left || 0) + 'px';
+    el.style.top = (data.top || 0) + 'px';
+    el.style.fontSize = (data.fontSize || 20) + 'px';
+    el.style.color = data.color || '#111111';
+    wireAnnoDrag(el);
+    editOverlay.appendChild(el);
+    return el;
+}
+
+function createWhiteoutEl(data) {
+    const el = document.createElement('div');
+    el.className = 'anno anno-whiteout';
+    el.dataset.type = 'whiteout';
+    el.style.left = (data.left || 0) + 'px';
+    el.style.top = (data.top || 0) + 'px';
+    el.style.width = (data.width || 120) + 'px';
+    el.style.height = (data.height || 32) + 'px';
+    wireAnnoDrag(el);
+    const handle = document.createElement('div');
+    handle.className = 'anno-resize';
+    el.appendChild(handle);
+    handle.addEventListener('mousedown', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        const sx = e.clientX, sy = e.clientY, sw = el.offsetWidth, sh = el.offsetHeight;
+        const onMove = (ev) => {
+            el.style.width = Math.max(12, sw + ev.clientX - sx) + 'px';
+            el.style.height = Math.max(12, sh + ev.clientY - sy) + 'px';
+        };
+        const onUp = () => { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); };
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup', onUp);
+    });
+    editOverlay.appendChild(el);
+    return el;
+}
+
+function wireAnnoDrag(el) {
+    el.addEventListener('mousedown', (e) => {
+        if (e.target.classList.contains('anno-resize')) return;
+        selectAnno(el);
+        const sx = e.clientX, sy = e.clientY;
+        const ol = parseFloat(el.style.left) || 0, ot = parseFloat(el.style.top) || 0;
+        let moved = false;
+        const onMove = (ev) => {
+            const dx = ev.clientX - sx, dy = ev.clientY - sy;
+            if (!moved && Math.abs(dx) + Math.abs(dy) > 3) { moved = true; if (el.dataset.type === 'text') el.blur(); }
+            if (moved) {
+                ev.preventDefault();
+                el.style.left = (ol + dx) + 'px';
+                el.style.top = (ot + dy) + 'px';
+            }
+        };
+        const onUp = () => { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); };
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup', onUp);
+    });
+}
+
+function selectAnno(el) {
+    if (selectedAnno) selectedAnno.classList.remove('selected');
+    selectedAnno = el;
+    el.classList.add('selected');
+    if (el.dataset.type === 'text') {
+        editFontSize.value = String(Math.round(parseFloat(el.style.fontSize) || 20));
+        const c = rgbToHex(el.style.color);
+        if (c) editColor.value = c;
+    }
+}
+
+function getAnnoText(el) {
+    // Reliable text extraction for the contenteditable box. innerText can be
+    // empty right after insertion (layout-dependent), so walk child nodes.
+    var NL = String.fromCharCode(10);
+    var out = '';
+    el.childNodes.forEach(function (node) {
+        if (node.nodeType === 3) {
+            out += node.nodeValue;
+        } else if (node.nodeName === 'BR') {
+            out += NL;
+        } else if (node.nodeType === 1) {
+            if (out && out.charAt(out.length - 1) !== NL) out += NL;
+            out += node.textContent;
+        }
+    });
+    if (!out) out = el.textContent || '';
+    return out.replace(/ /g, ' ');
+}
+
+function serializeEditPage() {
+    const dw = editBgImg.clientWidth || 1;
+    const dh = editBgImg.clientHeight || 1;
+    const annos = [];
+    editOverlay.querySelectorAll('.anno').forEach(el => {
+        const left = parseFloat(el.style.left) || 0;
+        const top = parseFloat(el.style.top) || 0;
+        if (el.dataset.type === 'text') {
+            annos.push({
+                type: 'text', leftPct: left / dw, topPct: top / dh,
+                text: getAnnoText(el),
+                fontPct: (parseFloat(el.style.fontSize) || 20) / dh,
+                color: el.style.color || '#111111'
+            });
+        } else {
+            annos.push({
+                type: 'whiteout', leftPct: left / dw, topPct: top / dh,
+                wPct: el.offsetWidth / dw, hPct: el.offsetHeight / dh
+            });
+        }
+    });
+    editPages[editPageIndex].annos = annos;
+}
+
+async function applyEdits() {
+    serializeEditPage();
+    const file = appFiles.find(f => f.id === editFileId);
+    if (!file) { closeEditor(); return; }
+
+    const isJpeg = file.type === 'image' && file.mimeType === 'image/jpeg';
+    const out = [];
+    for (const pg of editPages) {
+        const img = await loadImage(pg.src);
+        const W = img.naturalWidth, H = img.naturalHeight;
+        const canvas = document.createElement('canvas');
+        canvas.width = W; canvas.height = H;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, W, H);
+        const annos = pg.annos || [];
+        // Whiteouts first (background cover), then text on top — regardless of creation order
+        for (const a of annos.filter(a => a.type === 'whiteout')) {
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(a.leftPct * W, a.topPct * H, a.wPct * W, a.hPct * H);
+        }
+        for (const a of annos.filter(a => a.type === 'text')) {
+            const fs = a.fontPct * H;
+            ctx.fillStyle = a.color || '#111111';
+            ctx.font = fs + 'px Arial, Helvetica, sans-serif';
+            ctx.textBaseline = 'top';
+            const padX = fs * 0.2, padY = fs * 0.12;
+            let y = a.topPct * H + padY;
+            String(a.text || '').split('\n').forEach(line => {
+                ctx.fillText(line, a.leftPct * W + padX, y);
+                y += fs * 1.25;
+            });
+        }
+        out.push(canvas.toDataURL(isJpeg ? 'image/jpeg' : 'image/png', 0.92));
+    }
+
+    if (file.type === 'image') {
+        file.currentSrc = out[0];
+        const dim = await loadImage(out[0]);
+        file.width = dim.naturalWidth;
+        file.height = dim.naturalHeight;
+    } else {
+        file.pages.forEach((p, i) => { if (out[i]) p.png = out[i]; });
+    }
+    file.edited = true;
+
+    closeEditor();
+    renderList();
+    showToast(i18n.t('toast.edited'), 'success');
+}
+
+function closeEditor() {
+    editModal.classList.remove('active');
+    editOverlay.innerHTML = '';
+    editBgImg.onload = null;
+    editBgImg.src = '';
+    editFileId = null;
+    editPages = [];
+    selectedAnno = null;
+}
+
+function rgbToHex(rgb) {
+    if (!rgb) return null;
+    if (rgb[0] === '#') return rgb;
+    const m = rgb.match(/\d+/g);
+    if (!m || m.length < 3) return null;
+    return '#' + m.slice(0, 3).map(n => Number(n).toString(16).padStart(2, '0')).join('');
+}
+
 // ---------- Merge ----------
 
 async function mergePDFs() {
@@ -850,6 +1152,15 @@ function getImageSize(src) {
         const img = new Image();
         img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight });
         img.onerror = () => reject(new Error('Image decode failed'));
+        img.src = src;
+    });
+}
+
+function loadImage(src) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(new Error('Image load failed'));
         img.src = src;
     });
 }

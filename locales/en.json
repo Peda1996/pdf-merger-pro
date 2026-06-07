@@ -62,6 +62,15 @@
         "reset": "Reset",
         "apply": "Apply crop"
     },
+    "edit": {
+        "title": "Edit content",
+        "addText": "Add text",
+        "whiteout": "Whiteout",
+        "size": "Size",
+        "delete": "Delete",
+        "apply": "Apply changes",
+        "hint": "Drag to move. Whiteout covers; text adds on top."
+    },
     "confirm": {
         "clearTitle": "Clear all files?",
         "clearMessage": "This will remove all files from the list.",
@@ -75,6 +84,7 @@
         "error": "Error merging files",
         "added": "File added",
         "cropped": "Image cropped",
+        "edited": "Changes applied",
         "unsupported": "Unsupported file type",
         "previewError": "Could not load preview"
     },

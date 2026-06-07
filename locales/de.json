@@ -62,6 +62,15 @@
         "reset": "Zurücksetzen",
         "apply": "Zuschnitt übernehmen"
     },
+    "edit": {
+        "title": "Inhalt bearbeiten",
+        "addText": "Text hinzufügen",
+        "whiteout": "Übermalen",
+        "size": "Größe",
+        "delete": "Löschen",
+        "apply": "Änderungen übernehmen",
+        "hint": "Zum Verschieben ziehen. Weiß übermalt, Text wird ergänzt."
+    },
     "confirm": {
         "clearTitle": "Alles löschen?",
         "clearMessage": "Dies entfernt alle Dateien aus der Liste.",
@@ -75,6 +84,7 @@
         "error": "Fehler beim Zusammenfügen",
         "added": "Datei hinzugefügt",
         "cropped": "Bild zugeschnitten",
+        "edited": "Änderungen übernommen",
         "unsupported": "Nicht unterstützter Dateityp",
         "previewError": "Vorschau konnte nicht geladen werden"
     },

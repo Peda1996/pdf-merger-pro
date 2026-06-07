@@ -62,6 +62,15 @@
         "reset": "Reimposta",
         "apply": "Applica ritaglio"
     },
+    "edit": {
+        "title": "Modifica contenuto",
+        "addText": "Aggiungi testo",
+        "whiteout": "Copri",
+        "size": "Dimensione",
+        "delete": "Elimina",
+        "apply": "Applica modifiche",
+        "hint": "Trascina per spostare. Il riquadro copre, il testo si aggiunge."
+    },
     "confirm": {
         "clearTitle": "Cancellare tutto?",
         "clearMessage": "Rimuoverà tutti i file dalla lista.",
@@ -75,6 +84,7 @@
         "error": "Errore durante l'unione",
         "added": "File aggiunto",
         "cropped": "Immagine ritagliata",
+        "edited": "Modifiche applicate",
         "unsupported": "Tipo di file non supportato",
         "previewError": "Impossibile caricare l'anteprima"
     },

@@ -62,6 +62,15 @@
         "reset": "Restablecer",
         "apply": "Aplicar recorte"
     },
+    "edit": {
+        "title": "Editar contenido",
+        "addText": "Añadir texto",
+        "whiteout": "Cubrir",
+        "size": "Tamaño",
+        "delete": "Eliminar",
+        "apply": "Aplicar cambios",
+        "hint": "Arrastra para mover. El cubridor tapa, el texto se añade encima."
+    },
     "confirm": {
         "clearTitle": "¿Borrar todo?",
         "clearMessage": "Esto eliminará todos los archivos de la lista.",
@@ -75,6 +84,7 @@
         "error": "Error al combinar",
         "added": "Archivo añadido",
         "cropped": "Imagen recortada",
+        "edited": "Cambios aplicados",
         "unsupported": "Tipo de archivo no compatible",
         "previewError": "No se pudo cargar la vista previa"
     },

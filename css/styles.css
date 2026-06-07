@@ -287,6 +287,48 @@ kbd { font-size: 11px; }
 /* Cropper.js view box rounding tweak */
 .cropper-container { margin: auto; }
 
+/* Content editor (annotations) */
+.anno {
+    position: absolute;
+    cursor: move;
+    box-sizing: border-box;
+    user-select: none;
+}
+.anno.selected {
+    outline: 2px solid #6366f1;
+    outline-offset: 1px;
+    z-index: 5;
+}
+.anno-text {
+    min-width: 24px;
+    min-height: 1em;
+    padding: 2px 4px;
+    line-height: 1.25;
+    white-space: pre-wrap;
+    word-break: break-word;
+    outline: 1px dashed rgba(99, 102, 241, 0.5);
+    font-family: Arial, Helvetica, sans-serif;
+}
+.anno-text:focus {
+    outline: 2px solid #6366f1;
+    user-select: text;
+}
+.anno-whiteout {
+    background: #ffffff;
+    border: 1px dashed rgba(99, 102, 241, 0.4);
+}
+.anno-resize {
+    position: absolute;
+    right: -6px;
+    bottom: -6px;
+    width: 12px;
+    height: 12px;
+    background: #6366f1;
+    border: 2px solid #fff;
+    border-radius: 2px;
+    cursor: nwse-resize;
+}
+
 /* Thumbnail checkerboard for transparent images */
 .thumb-img.has-alpha {
     background-color: #fff;
