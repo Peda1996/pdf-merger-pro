@@ -34,7 +34,7 @@
     "dropzone": {
         "title": "Rilascia PDF, immagini e doc qui",
         "description": "Trascina o clicca per cercare.",
-        "formats": "Supporta PDF, Word (DOCX), JPG, PNG, WebP, GIF e BMP"
+        "formats": "Supporta PDF, Word, PowerPoint, JPG, PNG, WebP, GIF e BMP"
     },
     "list": {
         "title": "File da unire",

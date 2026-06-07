@@ -34,7 +34,7 @@
     "dropzone": {
         "title": "Drop PDFs, images & docs here",
         "description": "Drag & drop files or click to browse.",
-        "formats": "Supports PDF, Word (DOCX), JPG, PNG, WebP, GIF & BMP"
+        "formats": "Supports PDF, Word, PowerPoint, JPG, PNG, WebP, GIF & BMP"
     },
     "list": {
         "title": "Files to Merge",

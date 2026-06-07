@@ -34,7 +34,7 @@
     "dropzone": {
         "title": "Déposez PDF, images et docs ici",
         "description": "Glissez-déposez ou cliquez.",
-        "formats": "Prend en charge PDF, Word (DOCX), JPG, PNG, WebP, GIF et BMP"
+        "formats": "Prend en charge PDF, Word, PowerPoint, JPG, PNG, WebP, GIF et BMP"
     },
     "list": {
         "title": "Fichiers à fusionner",

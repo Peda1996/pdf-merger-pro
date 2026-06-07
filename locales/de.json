@@ -34,7 +34,7 @@
     "dropzone": {
         "title": "PDFs, Bilder & Dokumente ablegen",
         "description": "Dateien ziehen oder klicken.",
-        "formats": "Unterstützt PDF, Word (DOCX), JPG, PNG, WebP, GIF & BMP"
+        "formats": "Unterstützt PDF, Word, PowerPoint, JPG, PNG, WebP, GIF & BMP"
     },
     "list": {
         "title": "Dateiliste",

@@ -50,6 +50,7 @@ let dragSrcIndex = null;
 
 const PDF_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
 const DOCX_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/><line x1="9" y1="9" x2="11" y2="9"/></svg>';
+const PPTX_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>';
 
 // Initialize application
 document.addEventListener('DOMContentLoaded', () => {
@@ -144,10 +145,12 @@ const isPdf = (f) => f.type === 'application/pdf' || /\.pdf$/i.test(f.name);
 const isImage = (f) => f.type.startsWith('image/') || IMAGE_EXT.test(f.name);
 const isDocx = (f) => /\.docx$/i.test(f.name) ||
     f.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+const isPptx = (f) => /\.pptx$/i.test(f.name) ||
+    f.type === 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
 
 async function handleFiles(fileList) {
     const all = Array.from(fileList);
-    const accepted = all.filter(f => isPdf(f) || isImage(f) || isDocx(f));
+    const accepted = all.filter(f => isPdf(f) || isImage(f) || isDocx(f) || isPptx(f));
     if (accepted.length === 0) {
         if (all.length) showToast(i18n.t('toast.unsupported'), 'error');
         fileInput.value = '';
@@ -155,11 +158,12 @@ async function handleFiles(fileList) {
     }
 
     document.body.style.cursor = 'wait';
-    if (accepted.some(isDocx)) showToast(i18n.t('toast.converting'), 'info');
+    if (accepted.some(f => isDocx(f) || isPptx(f))) showToast(i18n.t('toast.converting'), 'info');
     for (const file of accepted) {
         try {
             if (isPdf(file)) await addPdf(file);
             else if (isDocx(file)) await addDocx(file);
+            else if (isPptx(file)) await addPptx(file);
             else await addImage(file);
         } catch (e) {
             console.error('Failed to load', file.name, e);
@@ -294,7 +298,103 @@ function makeThumb(src, maxDim) {
     });
 }
 
-// Merge is possible with 2+ files, or a single non-PDF (image/docx → PDF conversion).
+async function addPptx(file) {
+    const pages = await renderPptxToPages(file);
+    if (!pages.length) throw new Error('No slides rendered from PPTX');
+    const thumb = await makeThumb(pages[0].png, 160);
+    appFiles.push({
+        id: uid(),
+        name: file.name,
+        size: formatBytes(file.size),
+        type: 'pptx',
+        pages,                 // [{ png, wPt, hPt }]
+        pageCount: pages.length,
+        thumb
+    });
+}
+
+// Render a .pptx into an array of slide images using PPTXjs + html2canvas.
+// Note: slides are rasterized, so text in the final PDF is not selectable.
+async function renderPptxToPages(file) {
+    if (!window.jQuery || !window.html2canvas) throw new Error('PPTX libraries not loaded');
+
+    // PPTXjs uses the JSZip 2.x API (new JSZip(); zip.load()). docx-preview needs
+    // JSZip 3.x, so the global is 3.x by default — swap to 2.x just for PPTXjs.
+    const prevJSZip = window.JSZip;
+    if (window.__JSZip2) window.JSZip = window.__JSZip2;
+
+    const stage = document.getElementById('renderStage');
+    stage.innerHTML = '';
+    const container = document.createElement('div');
+    container.className = 'pptx-render';
+    stage.appendChild(container);
+
+    const url = URL.createObjectURL(file);
+    try {
+        window.jQuery(container).pptxToHtml({
+            pptxFileUrl: url,
+            slidesScale: '100%',
+            slideMode: false,
+            keyBoardShortCut: false
+        });
+
+        await waitForStableSlides(container);
+
+        const slides = Array.from(container.querySelectorAll('div.slide'));
+        if (!slides.length) throw new Error('No slides rendered');
+
+        const pages = [];
+        for (const slide of slides) {
+            const cssW = slide.offsetWidth || 960;
+            const cssH = slide.offsetHeight || 540;
+            const canvas = await window.html2canvas(slide, {
+                scale: 2,
+                backgroundColor: '#ffffff',
+                useCORS: true,
+                logging: false,
+                windowWidth: cssW,
+                windowHeight: cssH
+            });
+            pages.push({
+                png: canvas.toDataURL('image/png'),
+                wPt: cssW * 72 / 96,
+                hPt: cssH * 72 / 96
+            });
+        }
+        return pages;
+    } finally {
+        URL.revokeObjectURL(url);
+        stage.innerHTML = '';
+        window.JSZip = prevJSZip; // restore JSZip 3.x for docx-preview
+    }
+}
+
+// PPTXjs renders asynchronously with no completion promise, so poll until the
+// rendered slide count (real "div.slide" elements, not the loading bar) is stable.
+function waitForStableSlides(container, timeout = 20000) {
+    return new Promise((resolve, reject) => {
+        const start = Date.now();
+        let lastCount = -1;
+        let stableSince = Date.now();
+        const tick = () => {
+            const count = container.querySelectorAll('div.slide').length;
+            const now = Date.now();
+            if (count > 0 && count === lastCount) {
+                if (now - stableSince > 800) return resolve();
+            } else {
+                lastCount = count;
+                stableSince = now;
+            }
+            if (now - start > timeout) {
+                return count > 0 ? resolve() : reject(new Error('PPTX render timed out'));
+            }
+            setTimeout(tick, 150);
+        };
+        tick();
+    });
+}
+
+// Merge is possible with 2+ files, or a single non-PDF (image/docx/pptx → PDF conversion).
 function canMergeNow() {
     return appFiles.length >= 2 || (appFiles.length === 1 && appFiles[0].type !== 'pdf');
 }
@@ -357,15 +457,16 @@ function renderItem(file, index) {
         thumbImg.classList.toggle('has-alpha', file.mimeType === 'image/png');
         thumbIcon.classList.add('hidden');
         cropBtn.title = i18n.t('crop.title');
-    } else if (file.type === 'docx') {
-        meta.textContent = `DOCX · ${file.pageCount} ${i18n.t('list.pagesShort')} · ${file.size}`;
+    } else if (file.type === 'docx' || file.type === 'pptx') {
+        const label = file.type === 'docx' ? 'DOCX' : 'PPTX';
+        meta.textContent = `${label} · ${file.pageCount} ${i18n.t('list.pagesShort')} · ${file.size}`;
         cropBtn.classList.add('hidden'); // no cropping for documents
         if (file.thumb) {
             thumbImg.src = file.thumb;
             thumbImg.classList.remove('hidden');
             thumbIcon.classList.add('hidden');
         } else {
-            thumbIcon.innerHTML = DOCX_ICON;
+            thumbIcon.innerHTML = file.type === 'docx' ? DOCX_ICON : PPTX_ICON;
         }
     } else {
         meta.textContent = `PDF · ${file.pageCount} ${i18n.t('list.pagesShort')} · ${file.size}`;
@@ -488,7 +589,7 @@ async function openPreview(index) {
         previewCropBtn.classList.remove('hidden');
         previewCropBtn.classList.add('flex');
         previewCropBtn.onclick = () => { closePreview(); openCrop(index); };
-    } else if (file.type === 'docx') {
+    } else if (file.type === 'docx' || file.type === 'pptx') {
         previewMode = 'imagePages';
         previewPagesArr = file.pages.map(p => p.png);
         previewPageCount = previewPagesArr.length;
@@ -656,8 +757,8 @@ async function mergePDFs() {
                 const pdf = await PDFLib.PDFDocument.load(file.buffer, { ignoreEncryption: true });
                 const pages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
                 pages.forEach(p => mergedPdf.addPage(p));
-            } else if (file.type === 'docx') {
-                // Each rendered DOCX page is embedded at its own (A4/Letter) size
+            } else if (file.type === 'docx' || file.type === 'pptx') {
+                // Each rendered document page/slide is embedded at its own size
                 for (const pg of file.pages) {
                     const img = await mergedPdf.embedPng(dataUrlToUint8(pg.png));
                     const page = mergedPdf.addPage([pg.wPt, pg.hPt]);

@@ -22,11 +22,22 @@
     <!-- Cropper.js for client-side image cropping -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
-    <!-- JSZip + docx-preview for client-side Word (.docx) rendering -->
+    <!-- JSZip: 3.x for docx-preview, 2.x for PPTXjs (incompatible APIs, kept side by side) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script>window.__JSZip3 = window.JSZip;</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.6.1/jszip.min.js"></script>
+    <script>window.__JSZip2 = window.JSZip; window.JSZip = window.__JSZip3; /* default to 3.x */</script>
+    <!-- docx-preview for client-side Word (.docx) rendering (uses JSZip 3.x) -->
     <script src="https://cdn.jsdelivr.net/npm/docx-preview@0.3.5/dist/docx-preview.min.js"></script>
     <!-- html2canvas to rasterize rendered Office pages into the PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- jQuery + PPTXjs for client-side PowerPoint (.pptx) rendering (uses JSZip 2.x) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip-utils@0.1.0/dist/jszip-utils.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/meshesha/PPTXjs@v1.21.1/js/filereader.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/meshesha/PPTXjs@v1.21.1/css/pptxjs.css">
+    <script src="https://cdn.jsdelivr.net/gh/meshesha/PPTXjs@v1.21.1/js/pptxjs.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/meshesha/PPTXjs@v1.21.1/js/divs2slides.js"></script>
 
     <!-- Custom Styles -->
     <link rel="stylesheet" href="css/styles.css">
@@ -204,7 +215,7 @@
 
                 <!-- Drop Zone -->
                 <div id="dropZone" class="drop-zone bg-white dark:bg-slate-800 rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer min-h-[250px] relative group">
-                    <input type="file" id="fileInput" multiple accept=".pdf,.docx,image/jpeg,image/png,image/webp,image/gif,image/bmp,application/vnd.openxmlformats-officedocument.wordprocessingml.document" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" aria-label="Select PDFs, images and Word documents">
+                    <input type="file" id="fileInput" multiple accept=".pdf,.docx,.pptx,image/jpeg,image/png,image/webp,image/gif,image/bmp,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.presentationml.presentation" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" aria-label="Select PDFs, images, Word and PowerPoint files">
 
                     <div class="pointer-events-none transition-transform group-hover:scale-110 duration-300 mb-6 p-5 bg-red-50 dark:bg-red-900/30 rounded-full text-red-600 dark:text-red-400 shadow-sm">
                         <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><circle cx="10" cy="13" r="2"/><path d="m20 17-1.7-1.7a2 2 0 0 0-2.83 0L9 22"/></svg>
@@ -213,7 +224,7 @@
                     <p class="text-gray-500 dark:text-gray-400 pointer-events-none text-sm max-w-xs mx-auto mb-3">
                         <span data-i18n="dropzone.description">Drag & drop files or click to browse.</span>
                     </p>
-                    <p class="text-xs text-gray-400 dark:text-gray-500 pointer-events-none" data-i18n="dropzone.formats">Supports PDF, Word (DOCX), JPG, PNG, WebP, GIF &amp; BMP</p>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 pointer-events-none" data-i18n="dropzone.formats">Supports PDF, Word, PowerPoint, JPG, PNG, WebP, GIF &amp; BMP</p>
                 </div>
 
                 <!-- File List Section -->
