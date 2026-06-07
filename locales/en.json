@@ -70,7 +70,7 @@
         "size": "Size",
         "delete": "Delete",
         "apply": "Apply changes",
-        "hint": "Drag to move. Whiteout covers; text adds on top."
+        "hint": "Click recognized text to edit it. Drag to move; add text or whiteout."
     },
     "confirm": {
         "clearTitle": "Clear all files?",

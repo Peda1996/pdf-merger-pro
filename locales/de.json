@@ -70,7 +70,7 @@
         "size": "Größe",
         "delete": "Löschen",
         "apply": "Änderungen übernehmen",
-        "hint": "Zum Verschieben ziehen. Weiß übermalt, Text wird ergänzt."
+        "hint": "Erkannten Text anklicken zum Ändern. Ziehen zum Verschieben; Text/Weiß ergänzen."
     },
     "confirm": {
         "clearTitle": "Alles löschen?",

@@ -70,7 +70,7 @@
         "size": "Taille",
         "delete": "Supprimer",
         "apply": "Appliquer les modifications",
-        "hint": "Glissez pour déplacer. Le masque couvre, le texte s'ajoute."
+        "hint": "Cliquez sur le texte reconnu pour le modifier. Glissez pour déplacer."
     },
     "confirm": {
         "clearTitle": "Tout effacer ?",

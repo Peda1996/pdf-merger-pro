@@ -70,7 +70,7 @@
         "size": "Dimensione",
         "delete": "Elimina",
         "apply": "Applica modifiche",
-        "hint": "Trascina per spostare. Il riquadro copre, il testo si aggiunge."
+        "hint": "Clicca sul testo riconosciuto per modificarlo. Trascina per spostare."
     },
     "confirm": {
         "clearTitle": "Cancellare tutto?",

@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('editCancel').addEventListener('click', closeEditor);
     document.getElementById('editApply').addEventListener('click', applyEdits);
     document.getElementById('addTextBtn').addEventListener('click', () => {
-        const dw = editBgImg.clientWidth || 400, dh = editBgImg.clientHeight || 300;
+        const { w: dw, h: dh } = editDisplaySize();
         const el = createTextEl({ left: dw * 0.3, top: dh * 0.42, text: 'Text', fontSize: parseFloat(editFontSize.value) || 20, color: editColor.value });
         selectAnno(el);
         el.focus();
@@ -160,7 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
         sel.addRange(range);
     });
     document.getElementById('addWhiteoutBtn').addEventListener('click', () => {
-        const dw = editBgImg.clientWidth || 400, dh = editBgImg.clientHeight || 300;
+        const { w: dw, h: dh } = editDisplaySize();
         const el = createWhiteoutEl({ left: dw * 0.3, top: dh * 0.42, width: dw * 0.28, height: dh * 0.06 });
         selectAnno(el);
     });
@@ -830,10 +830,14 @@ async function openEditor(index) {
         }
     }
 
-    // Restore previously saved annotations (PDF keeps them as data)
+    // Restore previously saved edits (PDF keeps them as data: manual annos + recognized-text edits)
     if (file.annotations) {
         editPages.forEach((pg, i) => {
-            if (file.annotations[i]) pg.annos = file.annotations[i].map(a => Object.assign({}, a));
+            const saved = file.annotations[i];
+            if (saved) {
+                pg.annos = (saved.manual || []).map(a => Object.assign({}, a));
+                pg.savedEdits = saved.edits || {};
+            }
         });
     }
 
@@ -846,7 +850,8 @@ async function openEditor(index) {
     showEditPage(0);
 }
 
-// Render every PDF page to an image (display only) for the editor.
+// Render every PDF page to an image (display only) and extract its text items
+// (positions/sizes) so existing text can be edited in place.
 async function renderPdfPagesForEdit(buffer) {
     if (!window.pdfjsLib) throw new Error('pdf.js not loaded');
     const pdf = await pdfjsLib.getDocument({ data: buffer.slice(0) }).promise;
@@ -855,7 +860,8 @@ async function renderPdfPagesForEdit(buffer) {
         for (let i = 1; i <= pdf.numPages; i++) {
             const page = await pdf.getPage(i);
             const base = page.getViewport({ scale: 1 });
-            const scale = Math.min(2, 1100 / base.width);
+            const W = base.width, H = base.height;
+            const scale = Math.min(2, 1100 / W);
             const viewport = page.getViewport({ scale });
             const canvas = document.createElement('canvas');
             canvas.width = Math.ceil(viewport.width);
@@ -864,7 +870,36 @@ async function renderPdfPagesForEdit(buffer) {
             ctx.fillStyle = '#fff';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             await page.render({ canvasContext: ctx, viewport }).promise;
-            pages.push({ src: canvas.toDataURL('image/jpeg', 0.85), annos: [] });
+
+            // Extract text items (parser-based; coordinates in PDF points, origin bottom-left)
+            let textItems = [];
+            try {
+                const tc = await page.getTextContent();
+                textItems = tc.items.filter(it => it.str && it.str.trim()).map((it, k) => {
+                    const tx = it.transform;
+                    const size = Math.hypot(tx[1], tx[3]) || tx[3] || 12;
+                    const xPt = tx[4];
+                    const yBase = tx[5];
+                    const wPt = it.width || it.str.length * size * 0.5;
+                    return {
+                        idx: k,
+                        str: it.str,
+                        // text annotation coords (match drawAnnotationsOnPdfPage round-trip)
+                        leftPct: (xPt - size * 0.2) / W,
+                        topPct: (H - yBase - size * 0.92) / H,
+                        fontPct: size / H,
+                        // whiteout coords to cover the original glyphs
+                        woLeftPct: (xPt - size * 0.12) / W,
+                        woTopPct: (H - yBase - size * 0.95) / H,
+                        woWPct: (wPt + size * 0.24) / W,
+                        woHPct: (size * 1.3) / H
+                    };
+                });
+            } catch (e) {
+                console.warn('Text extraction failed for page', i, e);
+            }
+
+            pages.push({ src: canvas.toDataURL('image/jpeg', 0.85), annos: [], textItems });
         }
     } finally {
         pdf.destroy();
@@ -881,10 +916,13 @@ function showEditPage(i) {
     document.getElementById('editNext').disabled = i >= editPages.length - 1;
 
     editBgImg.onload = () => {
-        const dw = editBgImg.clientWidth || editBgImg.naturalWidth;
-        const dh = editBgImg.clientHeight || editBgImg.naturalHeight;
+        const { w: dw, h: dh } = editDisplaySize();
         editOverlay.style.width = dw + 'px';
         editOverlay.style.height = dh + 'px';
+        // Recognized PDF text → editable boxes (with any previously saved change)
+        const saved = editPages[i].savedEdits || {};
+        (editPages[i].textItems || []).forEach(t => createRecognizedTextEl(t, dw, dh, saved[t.idx]));
+        // Manual annotations
         (editPages[i].annos || []).forEach(a => {
             if (a.type === 'text') {
                 createTextEl({ left: a.leftPct * dw, top: a.topPct * dh, text: a.text, fontSize: a.fontPct * dh, color: a.color });
@@ -916,6 +954,35 @@ function createTextEl(data) {
     el.style.fontSize = (data.fontSize || 20) + 'px';
     el.style.color = data.color || '#111111';
     wireAnnoDrag(el);
+    editOverlay.appendChild(el);
+    return el;
+}
+
+// Editable box positioned over a recognized PDF text run. Only emitted at save
+// time if its text was actually changed.
+function createRecognizedTextEl(t, dw, dh, ed) {
+    const useEdit = ed && ed.text != null;
+    const el = document.createElement('div');
+    el.className = 'anno anno-text anno-recognized' + (useEdit ? ' anno-changed' : '');
+    el.contentEditable = 'true';
+    el.spellcheck = false;
+    el.dataset.type = 'text';
+    el.dataset.recognized = '1';
+    el.dataset.idx = t.idx;
+    el.dataset.orig = t.str;
+    el.dataset.woLeftPct = t.woLeftPct;
+    el.dataset.woTopPct = t.woTopPct;
+    el.dataset.woWPct = t.woWPct;
+    el.dataset.woHPct = t.woHPct;
+    el.textContent = useEdit ? ed.text : t.str;
+    el.style.left = ((useEdit ? ed.leftPct : t.leftPct) * dw) + 'px';
+    el.style.top = ((useEdit ? ed.topPct : t.topPct) * dh) + 'px';
+    el.style.fontSize = ((useEdit ? ed.fontPct : t.fontPct) * dh) + 'px';
+    el.style.color = (useEdit && ed.color) ? ed.color : '#000000';
+    wireAnnoDrag(el);
+    el.addEventListener('input', () => {
+        el.classList.toggle('anno-changed', getAnnoText(el) !== el.dataset.orig);
+    });
     editOverlay.appendChild(el);
     return el;
 }
@@ -970,6 +1037,14 @@ function wireAnnoDrag(el) {
     });
 }
 
+// Editor display size with a stable fallback (clientWidth can be 0 before layout)
+function editDisplaySize() {
+    return {
+        w: editBgImg.clientWidth || editBgImg.naturalWidth || 1,
+        h: editBgImg.clientHeight || editBgImg.naturalHeight || 1
+    };
+}
+
 function selectAnno(el) {
     if (selectedAnno) selectedAnno.classList.remove('selected');
     selectedAnno = el;
@@ -1001,13 +1076,26 @@ function getAnnoText(el) {
 }
 
 function serializeEditPage() {
-    const dw = editBgImg.clientWidth || 1;
-    const dh = editBgImg.clientHeight || 1;
-    const annos = [];
+    const { w: dw, h: dh } = editDisplaySize();
+    const annos = [];      // manual annotations (and image/office burn list)
+    const edits = {};      // changed recognized PDF text, keyed by item index
     editOverlay.querySelectorAll('.anno').forEach(el => {
         const left = parseFloat(el.style.left) || 0;
         const top = parseFloat(el.style.top) || 0;
-        if (el.dataset.type === 'text') {
+        if (el.dataset.recognized === '1') {
+            const text = getAnnoText(el);
+            if (text === el.dataset.orig) return; // unchanged → keep original PDF glyphs
+            edits[el.dataset.idx] = {
+                text,
+                leftPct: left / dw, topPct: top / dh,
+                fontPct: (parseFloat(el.style.fontSize) || 12) / dh,
+                color: el.style.color || '#000000',
+                woLeftPct: parseFloat(el.dataset.woLeftPct),
+                woTopPct: parseFloat(el.dataset.woTopPct),
+                woWPct: parseFloat(el.dataset.woWPct),
+                woHPct: parseFloat(el.dataset.woHPct)
+            };
+        } else if (el.dataset.type === 'text') {
             annos.push({
                 type: 'text', leftPct: left / dw, topPct: top / dh,
                 text: getAnnoText(el),
@@ -1022,6 +1110,7 @@ function serializeEditPage() {
         }
     });
     editPages[editPageIndex].annos = annos;
+    editPages[editPageIndex].edits = edits;
 }
 
 async function applyEdits() {
@@ -1033,7 +1122,11 @@ async function applyEdits() {
     // merge time (no rasterization, text stays crisp/selectable).
     if (file.type === 'pdf') {
         const ann = {};
-        editPages.forEach((pg, i) => { if (pg.annos && pg.annos.length) ann[i] = pg.annos; });
+        editPages.forEach((pg, i) => {
+            const manual = pg.annos || [];
+            const edits = pg.edits || {};
+            if (manual.length || Object.keys(edits).length) ann[i] = { manual, edits };
+        });
         file.annotations = Object.keys(ann).length ? ann : null;
         file.edited = !!file.annotations;
         closeEditor();
@@ -1126,9 +1219,18 @@ async function mergePDFs() {
                 const pages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
                 for (let idx = 0; idx < pages.length; idx++) {
                     mergedPdf.addPage(pages[idx]);
-                    if (file.annotations && file.annotations[idx]) {
-                        if (!annoFont) annoFont = await mergedPdf.embedFont(PDFLib.StandardFonts.Helvetica);
-                        drawAnnotationsOnPdfPage(pages[idx], file.annotations[idx], annoFont);
+                    const pageAnn = file.annotations && file.annotations[idx];
+                    if (pageAnn) {
+                        const all = (pageAnn.manual || []).slice();
+                        Object.keys(pageAnn.edits || {}).forEach(k => {
+                            const e = pageAnn.edits[k];
+                            all.push({ type: 'whiteout', leftPct: e.woLeftPct, topPct: e.woTopPct, wPct: e.woWPct, hPct: e.woHPct });
+                            all.push({ type: 'text', leftPct: e.leftPct, topPct: e.topPct, text: e.text, fontPct: e.fontPct, color: e.color });
+                        });
+                        if (all.length) {
+                            if (!annoFont) annoFont = await mergedPdf.embedFont(PDFLib.StandardFonts.Helvetica);
+                            drawAnnotationsOnPdfPage(pages[idx], all, annoFont);
+                        }
                     }
                 }
             } else if (file.type === 'docx' || file.type === 'pptx') {

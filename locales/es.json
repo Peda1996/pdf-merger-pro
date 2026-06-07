@@ -70,7 +70,7 @@
         "size": "Tamaño",
         "delete": "Eliminar",
         "apply": "Aplicar cambios",
-        "hint": "Arrastra para mover. El cubridor tapa, el texto se añade encima."
+        "hint": "Haz clic en el texto reconocido para editarlo. Arrastra para mover."
     },
     "confirm": {
         "clearTitle": "¿Borrar todo?",
