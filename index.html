@@ -448,6 +448,19 @@
         </div>
     </div>
 
+    <!-- Loading overlay (e.g. one-time PDF text-engine download) -->
+    <div id="loadingOverlay" class="preview-modal" role="dialog" aria-modal="true">
+        <div class="preview-content p-8 max-w-sm w-full mx-4 text-center">
+            <svg class="animate-spin h-10 w-10 mx-auto mb-4 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+            <h3 id="loadingTitle" class="text-lg font-bold text-gray-900 dark:text-white mb-1" data-i18n="loading.title">Preparing PDF text editor…</h3>
+            <p id="loadingSub" class="text-sm text-gray-500 dark:text-gray-400 mb-4" data-i18n="loading.sub">One-time download for true text removal.</p>
+            <div class="h-2.5 bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                <div id="loadingBar" class="h-full bg-indigo-600 transition-all duration-150 ease-out" style="width:0%"></div>
+            </div>
+            <p id="loadingPct" class="mt-2 text-sm font-mono text-gray-600 dark:text-gray-300">0%</p>
+        </div>
+    </div>
+
     <!-- List Item Template -->
     <template id="listItemTemplate">
         <div class="file-item flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors group" draggable="true">

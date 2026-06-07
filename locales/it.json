@@ -90,6 +90,10 @@
         "unsupported": "Tipo di file non supportato",
         "previewError": "Impossibile caricare l'anteprima"
     },
+    "loading": {
+        "title": "Preparazione editor di testo PDF…",
+        "sub": "Download una tantum per la rimozione reale del testo."
+    },
     "footer": {
         "rights": "Tutti i diritti riservati."
     }

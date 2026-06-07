@@ -1239,6 +1239,93 @@ function rgbToHex(rgb) {
 
 // ---------- Merge ----------
 
+// ---------- mupdf (true PDF text removal) ----------
+
+let _mupdfPromise = null;
+
+// Lazily fetch mupdf-wasm with a real progress %, then import the ESM module.
+function loadMuPDF(onProgress) {
+    if (window.__mupdf) return Promise.resolve(window.__mupdf);
+    if (_mupdfPromise) return _mupdfPromise;
+    _mupdfPromise = (async () => {
+        const VER = '1.27.0';
+        const wasmUrl = `https://cdn.jsdelivr.net/npm/mupdf@${VER}/dist/mupdf-wasm.wasm`;
+        const res = await fetch(wasmUrl);
+        if (!res.ok) throw new Error('mupdf wasm fetch failed: ' + res.status);
+        const total = Number(res.headers.get('Content-Length')) || 9991587;
+        const reader = res.body.getReader();
+        const chunks = [];
+        let received = 0;
+        for (;;) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            chunks.push(value);
+            received += value.length;
+            if (onProgress) onProgress(Math.min(0.99, received / total));
+        }
+        const wasmBinary = new Uint8Array(received);
+        let off = 0;
+        for (const c of chunks) { wasmBinary.set(c, off); off += c.length; }
+        // Inject the bytes so mupdf doesn't download the wasm again
+        globalThis['$libmupdf_wasm_Module'] = { wasmBinary: wasmBinary.buffer };
+        const mupdf = await import(`https://cdn.jsdelivr.net/npm/mupdf@${VER}/dist/mupdf.js`);
+        if (onProgress) onProgress(1);
+        window.__mupdf = mupdf;
+        return mupdf;
+    })();
+    _mupdfPromise.catch(() => { _mupdfPromise = null; }); // allow retry after a failure
+    return _mupdfPromise;
+}
+
+// Truly delete the original glyphs under each edit/whiteout rect, returning new PDF bytes.
+function redactPdfWithMuPDF(mupdf, buffer, annotations) {
+    const P = mupdf.PDFPage;
+    const doc = mupdf.Document.openDocument(buffer, 'application/pdf');
+    try {
+        const pdf = doc.asPDF ? doc.asPDF() : doc;
+        Object.keys(annotations).forEach(pageIdxStr => {
+            const pageIdx = Number(pageIdxStr);
+            const pageAnn = annotations[pageIdx] || {};
+            const rects = [];
+            Object.values(pageAnn.edits || {}).forEach(e => rects.push([e.woLeftPct, e.woTopPct, e.woWPct, e.woHPct]));
+            (pageAnn.manual || []).forEach(a => { if (a.type === 'whiteout') rects.push([a.leftPct, a.topPct, a.wPct, a.hPct]); });
+            if (!rects.length) return;
+            const page = doc.loadPage(pageIdx);
+            try {
+                const b = page.getBounds();       // [x0, y0, x1, y1], top-left origin
+                const W = b[2] - b[0], H = b[3] - b[1];
+                rects.forEach(([lp, tp, wp, hp]) => {
+                    const x0 = b[0] + lp * W, y0 = b[1] + tp * H;
+                    const a = page.createAnnotation('Redact');
+                    a.setRect([x0, y0, x0 + wp * W, y0 + hp * H]);
+                });
+                // Remove text only; leave images and line-art intact. No black box (we redraw text).
+                page.applyRedactions(false, P.REDACT_IMAGE_NONE, P.REDACT_LINE_ART_NONE, P.REDACT_TEXT_REMOVE);
+            } finally {
+                page.destroy();
+            }
+        });
+        return pdf.saveToBuffer('compress,garbage=compact').asUint8Array();
+    } finally {
+        doc.destroy();
+    }
+}
+
+function showLoadingOverlay() {
+    setLoadingProgress(0);
+    document.getElementById('loadingOverlay').classList.add('active');
+}
+function setLoadingProgress(p) {
+    const pct = Math.max(0, Math.min(100, Math.round(p * 100)));
+    document.getElementById('loadingBar').style.width = pct + '%';
+    document.getElementById('loadingPct').textContent = pct + '%';
+}
+function hideLoadingOverlay() {
+    document.getElementById('loadingOverlay').classList.remove('active');
+}
+
+// ---------- Merge ----------
+
 async function mergePDFs() {
     if (!canMergeNow()) return;
 
@@ -1248,22 +1335,46 @@ async function mergePDFs() {
     btn.disabled = true;
 
     try {
+        // True text removal: if any PDF has text edits or whiteouts, load mupdf once (with progress)
+        const needsRedaction = appFiles.some(f => f.type === 'pdf' && f.annotations &&
+            Object.values(f.annotations).some(p => (p.edits && Object.keys(p.edits).length) ||
+                (p.manual || []).some(a => a.type === 'whiteout')));
+        let mupdf = null;
+        if (needsRedaction) {
+            showLoadingOverlay();
+            try { mupdf = await loadMuPDF(setLoadingProgress); }
+            catch (e) { console.warn('mupdf unavailable, using whiteout fallback', e); mupdf = null; }
+            hideLoadingOverlay();
+        }
+
         const mergedPdf = await PDFLib.PDFDocument.create();
         const mode = imagePageSize.value;
         let annoFont = null; // Helvetica, embedded lazily for PDF annotations
 
         for (const file of appFiles) {
             if (file.type === 'pdf') {
-                const pdf = await PDFLib.PDFDocument.load(file.buffer, { ignoreEncryption: true });
+                let buffer = file.buffer;
+                let redacted = false;
+                if (mupdf && file.annotations) {
+                    try {
+                        buffer = redactPdfWithMuPDF(mupdf, file.buffer.slice(0), file.annotations);
+                        redacted = true; // original glyphs truly removed
+                    } catch (e) {
+                        console.warn('redaction failed, using whiteout fallback', e);
+                        buffer = file.buffer;
+                    }
+                }
+                const pdf = await PDFLib.PDFDocument.load(buffer, { ignoreEncryption: true });
                 const pages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
                 for (let idx = 0; idx < pages.length; idx++) {
                     mergedPdf.addPage(pages[idx]);
                     const pageAnn = file.annotations && file.annotations[idx];
                     if (pageAnn) {
-                        const all = (pageAnn.manual || []).slice();
+                        const all = (pageAnn.manual || []).slice(); // manual text/whiteout always drawn
                         Object.keys(pageAnn.edits || {}).forEach(k => {
                             const e = pageAnn.edits[k];
-                            all.push({ type: 'whiteout', leftPct: e.woLeftPct, topPct: e.woTopPct, wPct: e.woWPct, hPct: e.woHPct });
+                            // If redacted, the old glyphs are gone → no whiteout needed
+                            if (!redacted) all.push({ type: 'whiteout', leftPct: e.woLeftPct, topPct: e.woTopPct, wPct: e.woWPct, hPct: e.woHPct });
                             all.push({ type: 'text', leftPct: e.leftPct, topPct: e.topPct, text: e.text, fontPct: e.fontPct, color: e.color });
                         });
                         if (all.length) {
@@ -1298,6 +1409,7 @@ async function mergePDFs() {
         console.error(err);
         showToast(i18n.t('toast.error'), 'error');
     } finally {
+        hideLoadingOverlay();
         btn.innerHTML = originalText;
         btn.disabled = false;
         renderList();

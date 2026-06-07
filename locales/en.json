@@ -90,6 +90,10 @@
         "unsupported": "Unsupported file type",
         "previewError": "Could not load preview"
     },
+    "loading": {
+        "title": "Preparing PDF text editor…",
+        "sub": "One-time download for true text removal."
+    },
     "footer": {
         "rights": "All rights reserved."
     }

@@ -90,6 +90,10 @@
         "unsupported": "Nicht unterstützter Dateityp",
         "previewError": "Vorschau konnte nicht geladen werden"
     },
+    "loading": {
+        "title": "PDF-Texteditor wird vorbereitet…",
+        "sub": "Einmaliger Download für echtes Text-Entfernen."
+    },
     "footer": {
         "rights": "Alle Rechte vorbehalten."
     }

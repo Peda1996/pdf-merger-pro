@@ -132,8 +132,9 @@ try:
     recog = js("return document.querySelectorAll('#editOverlay .anno-recognized').length")
     sample = js("return (document.querySelector('#editOverlay .anno-recognized')||{}).textContent || ''")
     log("PDF text recognized as editable boxes", recog > 0, f"boxes={recog} sample='{sample}'")
-    js("var el=document.querySelector('#editOverlay .anno-recognized'); el.focus(); "
-       "el.textContent='GEAENDERT'; el.dispatchEvent(new Event('input',{bubbles:true}));")
+    js("var el=[...document.querySelectorAll('#editOverlay .anno-recognized')]"
+       ".find(e=>(e.dataset.orig||'').indexOf('Vertraulich')>=0) || document.querySelector('#editOverlay .anno-recognized');"
+       "el.focus(); el.textContent='GEAENDERT'; el.dispatchEvent(new Event('input',{bubbles:true}));")
     log("changed box flagged", js("return document.querySelector('#editOverlay .anno-recognized').classList.contains('anno-changed')"))
     driver.find_element(By.ID, "editApply").click()
     W.until(lambda dr: not dr.execute_script("return document.getElementById('editModal').classList.contains('active')"))
@@ -201,6 +202,7 @@ try:
         # PDF (2) + image (1) + DOCX (1) + PPTX (2) = 6
         log("merged page count = 6", npages == 6, f"pages={npages}")
         log("edited PDF text 'GEAENDERT' present in output", "GEAENDERT" in alltext)
+        log("original text 'Vertraulich' truly removed (mupdf redaction)", "Vertraulich" not in alltext, "")
         log("DOCX content (rasterized -> no selectable text expected)", True, f"chars_extracted={len(alltext)}")
     else:
         log("merged PDF downloaded", False, "no file in download dir")

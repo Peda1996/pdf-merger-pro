@@ -90,6 +90,10 @@
         "unsupported": "Tipo de archivo no compatible",
         "previewError": "No se pudo cargar la vista previa"
     },
+    "loading": {
+        "title": "Preparando el editor de texto PDF…",
+        "sub": "Descarga única para eliminar texto de verdad."
+    },
     "footer": {
         "rights": "Todos los derechos reservados."
     }

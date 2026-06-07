@@ -90,6 +90,10 @@
         "unsupported": "Tipo de arquivo não suportado",
         "previewError": "Não foi possível carregar a pré-visualização"
     },
+    "loading": {
+        "title": "Preparando o editor de texto PDF…",
+        "sub": "Download único para remoção real de texto."
+    },
     "footer": {
         "rights": "Todos os direitos reservados."
     }

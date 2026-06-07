@@ -90,6 +90,10 @@
         "unsupported": "Type de fichier non pris en charge",
         "previewError": "Impossible de charger l'aperçu"
     },
+    "loading": {
+        "title": "Préparation de l'éditeur de texte PDF…",
+        "sub": "Téléchargement unique pour la suppression réelle du texte."
+    },
     "footer": {
         "rights": "Tous droits réservés."
     }
