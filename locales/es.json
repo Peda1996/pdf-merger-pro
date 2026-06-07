@@ -32,9 +32,9 @@
         "worksOffline": "Funciona sin conexión"
     },
     "dropzone": {
-        "title": "Suelta PDF e imágenes aquí",
+        "title": "Suelta PDF, imágenes y docs aquí",
         "description": "Arrastra o haz clic para buscar.",
-        "formats": "Compatible con PDF, JPG, PNG, WebP, GIF y BMP"
+        "formats": "Compatible con PDF, Word (DOCX), JPG, PNG, WebP, GIF y BMP"
     },
     "list": {
         "title": "Archivos a unir",
@@ -71,6 +71,7 @@
     "toast": {
         "merged": "¡Combinado con éxito!",
         "merging": "Combinando...",
+        "converting": "Convirtiendo documento…",
         "error": "Error al combinar",
         "added": "Archivo añadido",
         "cropped": "Imagen recortada",

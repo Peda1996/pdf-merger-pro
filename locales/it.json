@@ -32,9 +32,9 @@
         "worksOffline": "Funziona offline"
     },
     "dropzone": {
-        "title": "Rilascia PDF e immagini qui",
+        "title": "Rilascia PDF, immagini e doc qui",
         "description": "Trascina o clicca per cercare.",
-        "formats": "Supporta PDF, JPG, PNG, WebP, GIF e BMP"
+        "formats": "Supporta PDF, Word (DOCX), JPG, PNG, WebP, GIF e BMP"
     },
     "list": {
         "title": "File da unire",
@@ -71,6 +71,7 @@
     "toast": {
         "merged": "Unito con successo!",
         "merging": "Unione in corso...",
+        "converting": "Conversione del documento…",
         "error": "Errore durante l'unione",
         "added": "File aggiunto",
         "cropped": "Immagine ritagliata",

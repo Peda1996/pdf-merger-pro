@@ -32,9 +32,9 @@
         "worksOffline": "Funktioniert offline"
     },
     "dropzone": {
-        "title": "PDFs & Bilder hier ablegen",
+        "title": "PDFs, Bilder & Dokumente ablegen",
         "description": "Dateien ziehen oder klicken.",
-        "formats": "Unterstützt PDF, JPG, PNG, WebP, GIF & BMP"
+        "formats": "Unterstützt PDF, Word (DOCX), JPG, PNG, WebP, GIF & BMP"
     },
     "list": {
         "title": "Dateiliste",
@@ -71,6 +71,7 @@
     "toast": {
         "merged": "Erfolgreich zusammengefügt!",
         "merging": "Wird zusammengefügt...",
+        "converting": "Dokument wird konvertiert…",
         "error": "Fehler beim Zusammenfügen",
         "added": "Datei hinzugefügt",
         "cropped": "Bild zugeschnitten",

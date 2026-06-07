@@ -32,9 +32,9 @@
         "worksOffline": "Works Offline"
     },
     "dropzone": {
-        "title": "Drop PDFs & images here",
+        "title": "Drop PDFs, images & docs here",
         "description": "Drag & drop files or click to browse.",
-        "formats": "Supports PDF, JPG, PNG, WebP, GIF & BMP"
+        "formats": "Supports PDF, Word (DOCX), JPG, PNG, WebP, GIF & BMP"
     },
     "list": {
         "title": "Files to Merge",
@@ -71,6 +71,7 @@
     "toast": {
         "merged": "Merged successfully!",
         "merging": "Merging...",
+        "converting": "Converting document…",
         "error": "Error merging files",
         "added": "File added",
         "cropped": "Image cropped",

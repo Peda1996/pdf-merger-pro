@@ -32,9 +32,9 @@
         "worksOffline": "Funciona offline"
     },
     "dropzone": {
-        "title": "Solte PDFs e imagens aqui",
+        "title": "Solte PDFs, imagens e docs aqui",
         "description": "Arraste ou clique para buscar.",
-        "formats": "Suporta PDF, JPG, PNG, WebP, GIF e BMP"
+        "formats": "Suporta PDF, Word (DOCX), JPG, PNG, WebP, GIF e BMP"
     },
     "list": {
         "title": "Arquivos para unir",
@@ -71,6 +71,7 @@
     "toast": {
         "merged": "Mesclado com sucesso!",
         "merging": "Mesclando...",
+        "converting": "Convertendo documento…",
         "error": "Erro ao mesclar",
         "added": "Arquivo adicionado",
         "cropped": "Imagem recortada",

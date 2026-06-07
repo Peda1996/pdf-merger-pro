@@ -40,6 +40,8 @@ const aspectGroup = document.getElementById('aspectGroup');
 let previewPdf = null;
 let previewPage = 1;
 let previewPageCount = 1;
+let previewMode = 'pdf';      // 'pdf' | 'imagePages'
+let previewPagesArr = [];     // PNG data URLs for 'imagePages' mode (e.g. DOCX)
 let cropper = null;
 let cropFileId = null;
 let cropFlipX = 1;
@@ -47,6 +49,7 @@ let cropFlipY = 1;
 let dragSrcIndex = null;
 
 const PDF_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
+const DOCX_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/><line x1="9" y1="9" x2="11" y2="9"/></svg>';
 
 // Initialize application
 document.addEventListener('DOMContentLoaded', () => {
@@ -100,8 +103,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Preview modal wiring
     document.getElementById('previewClose').addEventListener('click', closePreview);
     previewModal.addEventListener('click', (e) => { if (e.target === previewModal) closePreview(); });
-    pdfPrev.addEventListener('click', () => { if (previewPage > 1) { previewPage--; renderPreviewPage(); } });
-    pdfNext.addEventListener('click', () => { if (previewPage < previewPageCount) { previewPage++; renderPreviewPage(); } });
+    pdfPrev.addEventListener('click', () => previewGo(-1));
+    pdfNext.addEventListener('click', () => previewGo(1));
 
     // Crop modal wiring
     document.getElementById('cropClose').addEventListener('click', closeCrop);
@@ -139,10 +142,12 @@ document.addEventListener('DOMContentLoaded', () => {
 const IMAGE_EXT = /\.(jpe?g|png|webp|gif|bmp)$/i;
 const isPdf = (f) => f.type === 'application/pdf' || /\.pdf$/i.test(f.name);
 const isImage = (f) => f.type.startsWith('image/') || IMAGE_EXT.test(f.name);
+const isDocx = (f) => /\.docx$/i.test(f.name) ||
+    f.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
 
 async function handleFiles(fileList) {
     const all = Array.from(fileList);
-    const accepted = all.filter(f => isPdf(f) || isImage(f));
+    const accepted = all.filter(f => isPdf(f) || isImage(f) || isDocx(f));
     if (accepted.length === 0) {
         if (all.length) showToast(i18n.t('toast.unsupported'), 'error');
         fileInput.value = '';
@@ -150,9 +155,11 @@ async function handleFiles(fileList) {
     }
 
     document.body.style.cursor = 'wait';
+    if (accepted.some(isDocx)) showToast(i18n.t('toast.converting'), 'info');
     for (const file of accepted) {
         try {
             if (isPdf(file)) await addPdf(file);
+            else if (isDocx(file)) await addDocx(file);
             else await addImage(file);
         } catch (e) {
             console.error('Failed to load', file.name, e);
@@ -208,6 +215,90 @@ async function addImage(file) {
     });
 }
 
+async function addDocx(file) {
+    const buffer = await file.arrayBuffer();
+    const pages = await renderDocxToPages(buffer);
+    if (!pages.length) throw new Error('No pages rendered from DOCX');
+    const thumb = await makeThumb(pages[0].png, 160);
+    appFiles.push({
+        id: uid(),
+        name: file.name,
+        size: formatBytes(file.size),
+        type: 'docx',
+        pages,                 // [{ png, wPt, hPt }]
+        pageCount: pages.length,
+        thumb
+    });
+}
+
+// Render a .docx into an array of page images using docx-preview + html2canvas.
+// Note: pages are rasterized, so text in the final PDF is not selectable.
+async function renderDocxToPages(arrayBuffer) {
+    if (!window.docx || !window.html2canvas) throw new Error('DOCX libraries not loaded');
+    const stage = document.getElementById('renderStage');
+    stage.innerHTML = '';
+    const container = document.createElement('div');
+    stage.appendChild(container);
+
+    await window.docx.renderAsync(arrayBuffer, container, null, {
+        className: 'docx',
+        inWrapper: true,
+        ignoreWidth: false,
+        ignoreHeight: false,
+        breakPages: true,
+        useBase64URL: true,
+        experimental: true
+    });
+
+    // docx-preview emits one <section class="docx"> per page
+    let sections = Array.from(container.querySelectorAll('section.docx'));
+    if (!sections.length) sections = [container];
+
+    const pages = [];
+    for (const sec of sections) {
+        const cssW = sec.offsetWidth || 794;
+        const cssH = sec.offsetHeight || 1123;
+        const canvas = await window.html2canvas(sec, {
+            scale: 2,
+            backgroundColor: '#ffffff',
+            useCORS: true,
+            logging: false,
+            windowWidth: cssW,
+            windowHeight: cssH
+        });
+        pages.push({
+            png: canvas.toDataURL('image/png'),
+            wPt: cssW * 72 / 96,   // CSS px (96dpi) -> PDF points
+            hPt: cssH * 72 / 96
+        });
+    }
+
+    stage.innerHTML = '';
+    return pages;
+}
+
+function makeThumb(src, maxDim) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+            const scale = maxDim / Math.max(img.naturalWidth, img.naturalHeight);
+            const w = Math.max(1, Math.round(img.naturalWidth * scale));
+            const h = Math.max(1, Math.round(img.naturalHeight * scale));
+            const c = document.createElement('canvas');
+            c.width = w; c.height = h;
+            c.getContext('2d').drawImage(img, 0, 0, w, h);
+            resolve(c.toDataURL('image/jpeg', 0.82));
+        };
+        img.onerror = () => resolve(src);
+        img.src = src;
+    });
+}
+
+// Merge is possible with 2+ files, or a single non-PDF (image/docx → PDF conversion).
+function canMergeNow() {
+    return appFiles.length >= 2 || (appFiles.length === 1 && appFiles[0].type !== 'pdf');
+}
+
 // ---------- List rendering ----------
 
 function renderList() {
@@ -222,15 +313,15 @@ function renderList() {
 
     // Stats
     countBadge.textContent = appFiles.length;
-    const totalPages = appFiles.reduce((sum, f) => sum + (f.type === 'pdf' ? f.pageCount : 1), 0);
+    const totalPages = appFiles.reduce((sum, f) => sum + (f.pageCount || 1), 0);
     document.getElementById('totalPageInfo').textContent =
         `${appFiles.length} ${i18n.t('list.files')} · ${totalPages} ${i18n.t('list.pagesShort')}`;
 
     // Image options visibility
     imageOptions.classList.toggle('hidden', !appFiles.some(f => f.type === 'image'));
 
-    // Merge availability: 2+ files, or a single image (image → PDF conversion)
-    const canMerge = appFiles.length >= 2 || (appFiles.length === 1 && appFiles[0].type === 'image');
+    // Merge availability: 2+ files, or a single non-PDF (image/docx → PDF conversion)
+    const canMerge = canMergeNow();
     mergeBtn.disabled = !canMerge;
     if (mergeHint) mergeHint.classList.toggle('hidden', canMerge);
 
@@ -266,6 +357,16 @@ function renderItem(file, index) {
         thumbImg.classList.toggle('has-alpha', file.mimeType === 'image/png');
         thumbIcon.classList.add('hidden');
         cropBtn.title = i18n.t('crop.title');
+    } else if (file.type === 'docx') {
+        meta.textContent = `DOCX · ${file.pageCount} ${i18n.t('list.pagesShort')} · ${file.size}`;
+        cropBtn.classList.add('hidden'); // no cropping for documents
+        if (file.thumb) {
+            thumbImg.src = file.thumb;
+            thumbImg.classList.remove('hidden');
+            thumbIcon.classList.add('hidden');
+        } else {
+            thumbIcon.innerHTML = DOCX_ICON;
+        }
     } else {
         meta.textContent = `PDF · ${file.pageCount} ${i18n.t('list.pagesShort')} · ${file.size}`;
         cropBtn.classList.add('hidden'); // no cropping for PDFs
@@ -381,12 +482,22 @@ async function openPreview(index) {
     previewModal.classList.add('active');
 
     if (file.type === 'image') {
+        previewMode = 'image';
         previewImage.src = file.currentSrc;
         previewImage.classList.remove('hidden');
         previewCropBtn.classList.remove('hidden');
         previewCropBtn.classList.add('flex');
         previewCropBtn.onclick = () => { closePreview(); openCrop(index); };
+    } else if (file.type === 'docx') {
+        previewMode = 'imagePages';
+        previewPagesArr = file.pages.map(p => p.png);
+        previewPageCount = previewPagesArr.length;
+        previewPage = 1;
+        pdfNav.classList.remove('hidden');
+        pdfNav.classList.add('flex');
+        showImagePage();
     } else {
+        previewMode = 'pdf';
         previewLoading.classList.remove('hidden');
         previewLoading.classList.add('flex');
         try {
@@ -406,6 +517,24 @@ async function openPreview(index) {
             previewLoading.classList.remove('flex');
         }
     }
+}
+
+// Show a page in 'imagePages' mode (e.g. rendered DOCX pages)
+function showImagePage() {
+    previewImage.src = previewPagesArr[previewPage - 1];
+    previewImage.classList.remove('hidden');
+    pdfPageInfo.textContent = `${previewPage} / ${previewPageCount}`;
+    pdfPrev.disabled = previewPage <= 1;
+    pdfNext.disabled = previewPage >= previewPageCount;
+}
+
+// Page navigation shared by PDF and imagePages modes
+function previewGo(delta) {
+    const next = previewPage + delta;
+    if (next < 1 || next > previewPageCount) return;
+    previewPage = next;
+    if (previewMode === 'pdf') renderPreviewPage();
+    else showImagePage();
 }
 
 async function renderPreviewPage() {
@@ -511,8 +640,7 @@ function closeCrop() {
 // ---------- Merge ----------
 
 async function mergePDFs() {
-    const canMerge = appFiles.length >= 2 || (appFiles.length === 1 && appFiles[0].type === 'image');
-    if (!canMerge) return;
+    if (!canMergeNow()) return;
 
     const btn = mergeBtn;
     const originalText = btn.innerHTML;
@@ -528,6 +656,13 @@ async function mergePDFs() {
                 const pdf = await PDFLib.PDFDocument.load(file.buffer, { ignoreEncryption: true });
                 const pages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
                 pages.forEach(p => mergedPdf.addPage(p));
+            } else if (file.type === 'docx') {
+                // Each rendered DOCX page is embedded at its own (A4/Letter) size
+                for (const pg of file.pages) {
+                    const img = await mergedPdf.embedPng(dataUrlToUint8(pg.png));
+                    const page = mergedPdf.addPage([pg.wPt, pg.hPt]);
+                    page.drawImage(img, { x: 0, y: 0, width: pg.wPt, height: pg.hPt });
+                }
             } else {
                 const bytes = dataUrlToUint8(file.currentSrc);
                 const img = file.mimeType === 'image/png'
