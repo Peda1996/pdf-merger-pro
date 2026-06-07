@@ -10,7 +10,7 @@
         "title": "Options",
         "outputName": "Nom du fichier",
         "mergeAction": "Fusionner les fichiers",
-        "hint": "Ajoutez au moins 2 fichiers.",
+        "hint": "Ajoutez un fichier à fusionner ou éditer.",
         "imagePageSize": "Taille de page image",
         "pageFit": "Adapter à l'image",
         "pageA4": "Page A4",

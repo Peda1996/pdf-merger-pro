@@ -10,7 +10,7 @@
         "title": "Optionen",
         "outputName": "Dateiname",
         "mergeAction": "Dateien zusammenfügen",
-        "hint": "Mindestens 2 Dateien hinzufügen.",
+        "hint": "Datei zum Zusammenfügen oder Bearbeiten hinzufügen.",
         "imagePageSize": "Bild-Seitengröße",
         "pageFit": "An Bild anpassen",
         "pageA4": "A4-Seite",

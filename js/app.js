@@ -289,6 +289,17 @@ async function addDocx(file) {
 // Rasterize a rendered page/slide element to a canvas. Prefers modern-screenshot
 // (renders SVG shapes that PPTXjs emits) and falls back to html2canvas.
 async function rasterizePage(el) {
+    // Wait for embedded images to decode and fonts to load before capturing,
+    // otherwise the rasterizer can grab a frame with missing images/glyphs.
+    try {
+        await Promise.all(Array.from(el.querySelectorAll('img')).map(img =>
+            (img.complete && img.naturalWidth)
+                ? Promise.resolve()
+                : (img.decode ? img.decode().catch(() => {}) : new Promise(r => { img.onload = img.onerror = r; }))
+        ));
+        if (document.fonts && document.fonts.ready) await document.fonts.ready;
+    } catch (_) { /* best effort */ }
+
     if (window.modernScreenshot && window.modernScreenshot.domToCanvas) {
         try {
             return await window.modernScreenshot.domToCanvas(el, { scale: 2, backgroundColor: '#ffffff' });
@@ -444,9 +455,10 @@ function waitForStableSlides(container, timeout = 20000) {
     });
 }
 
-// Merge is possible with 2+ files, or a single non-PDF (image/docx/pptx → PDF conversion).
+// Enabled from the first document: 2+ files merge, a single non-PDF converts to
+// PDF, and a single PDF can be exported (e.g. after editing its text).
 function canMergeNow() {
-    return appFiles.length >= 2 || (appFiles.length === 1 && appFiles[0].type !== 'pdf');
+    return appFiles.length >= 1;
 }
 
 // ---------- List rendering ----------
@@ -896,6 +908,16 @@ async function renderPdfPagesForEdit(buffer) {
                 });
             } catch (e) {
                 console.warn('Text extraction failed for page', i, e);
+            }
+
+            // White out the recognized text in the editor image so the editable
+            // boxes (which carry the text) don't show a doubled/ghosted background.
+            if (textItems.length) {
+                ctx.fillStyle = '#ffffff';
+                textItems.forEach(t => {
+                    ctx.fillRect(t.woLeftPct * canvas.width, t.woTopPct * canvas.height,
+                        t.woWPct * canvas.width, t.woHPct * canvas.height);
+                });
             }
 
             pages.push({ src: canvas.toDataURL('image/jpeg', 0.85), annos: [], textItems });

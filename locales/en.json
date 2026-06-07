@@ -10,7 +10,7 @@
         "title": "Merge Options",
         "outputName": "Output Filename",
         "mergeAction": "Merge Files",
-        "hint": "Add at least 2 files to merge.",
+        "hint": "Add a file to merge or edit.",
         "imagePageSize": "Image page size",
         "pageFit": "Fit to image",
         "pageA4": "A4 page",

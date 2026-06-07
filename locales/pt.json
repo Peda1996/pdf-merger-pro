@@ -10,7 +10,7 @@
         "title": "Opções",
         "outputName": "Nome do arquivo",
         "mergeAction": "Mesclar arquivos",
-        "hint": "Adicione pelo menos 2 arquivos.",
+        "hint": "Adicione um arquivo para mesclar ou editar.",
         "imagePageSize": "Tamanho da página de imagem",
         "pageFit": "Ajustar à imagem",
         "pageA4": "Página A4",
