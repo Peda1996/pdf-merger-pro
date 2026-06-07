@@ -70,7 +70,8 @@
         "size": "Dimensione",
         "delete": "Elimina",
         "apply": "Applica modifiche",
-        "hint": "Clicca sul testo riconosciuto per modificarlo. Trascina per spostare."
+        "hint": "Clicca sul testo riconosciuto per modificarlo. Trascina per spostare.",
+        "coverNote": "Nota: il testo coperto è nascosto ma resta nel PDF (ancora trovabile con la ricerca)."
     },
     "confirm": {
         "clearTitle": "Cancellare tutto?",

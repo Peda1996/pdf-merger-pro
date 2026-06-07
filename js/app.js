@@ -854,6 +854,8 @@ async function openEditor(index) {
 
     editPageIndex = 0;
     document.getElementById('editTitle').textContent = file.name;
+    // The "covered text stays in the PDF" note only applies to PDF text editing
+    document.getElementById('editCoverNote').classList.toggle('hidden', file.type !== 'pdf');
     editModal.classList.add('active');
     const multi = editPages.length > 1;
     editNav.classList.toggle('hidden', !multi);

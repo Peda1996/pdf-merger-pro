@@ -70,7 +70,8 @@
         "size": "Tamanho",
         "delete": "Excluir",
         "apply": "Aplicar alterações",
-        "hint": "Clique no texto reconhecido para editá-lo. Arraste para mover."
+        "hint": "Clique no texto reconhecido para editá-lo. Arraste para mover.",
+        "coverNote": "Nota: o texto coberto fica oculto, mas permanece no PDF (ainda localizável por busca)."
     },
     "confirm": {
         "clearTitle": "Limpar tudo?",

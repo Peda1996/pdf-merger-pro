@@ -70,7 +70,8 @@
         "size": "Größe",
         "delete": "Löschen",
         "apply": "Änderungen übernehmen",
-        "hint": "Erkannten Text anklicken zum Ändern. Ziehen zum Verschieben; Text/Weiß ergänzen."
+        "hint": "Erkannten Text anklicken zum Ändern. Ziehen zum Verschieben; Text/Weiß ergänzen.",
+        "coverNote": "Hinweis: Überdeckter Text ist verborgen, bleibt aber im PDF (per Suche auffindbar)."
     },
     "confirm": {
         "clearTitle": "Alles löschen?",

@@ -70,7 +70,8 @@
         "size": "Size",
         "delete": "Delete",
         "apply": "Apply changes",
-        "hint": "Click recognized text to edit it. Drag to move; add text or whiteout."
+        "hint": "Click recognized text to edit it. Drag to move; add text or whiteout.",
+        "coverNote": "Note: covered text is hidden, but stays in the PDF (still findable by search)."
     },
     "confirm": {
         "clearTitle": "Clear all files?",
