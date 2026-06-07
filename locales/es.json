@@ -9,43 +9,73 @@
     "settings": {
         "title": "Opciones",
         "outputName": "Nombre de archivo",
-        "mergeAction": "Fusionar PDFs",
-        "hint": "Anade al menos 2 archivos."
+        "mergeAction": "Combinar archivos",
+        "hint": "Añade al menos 2 archivos.",
+        "imagePageSize": "Tamaño de página de imagen",
+        "pageFit": "Ajustar a la imagen",
+        "pageA4": "Página A4",
+        "pageLetter": "Página Letter",
+        "imagePageSizeHint": "Solo se aplica a las páginas de imagen."
     },
     "privacy": {
-        "badge": "Solo en Su Dispositivo",
+        "badge": "Solo en su dispositivo",
         "title": "100% Privacidad",
-        "description": "Sus PDFs se procesan EXCLUSIVAMENTE en este dispositivo. Los archivos NUNCA salen de su ordenador. No se necesita conexion a Internet despues de cargar la pagina.",
+        "description": "Sus archivos se procesan EXCLUSIVAMENTE en este dispositivo. Los archivos NUNCA salen de su ordenador. No se necesita conexión a Internet después de cargar la página.",
         "whatDoesntHappen": "Lo que NO sucede:",
-        "noUpload": "Sin Subida",
-        "noServer": "Sin Servidor",
-        "noCloud": "Sin Nube",
-        "noTracking": "Sin Rastreo",
-        "whatHappens": "Lo que SI sucede:",
-        "localProcessing": "Procesamiento Local",
-        "staysOnDevice": "Permanece en Dispositivo",
-        "worksOffline": "Funciona Sin Conexion"
+        "noUpload": "Sin subida",
+        "noServer": "Sin servidor",
+        "noCloud": "Sin nube",
+        "noTracking": "Sin rastreo",
+        "whatHappens": "Lo que SÍ sucede:",
+        "localProcessing": "Procesamiento local",
+        "staysOnDevice": "Permanece en el dispositivo",
+        "worksOffline": "Funciona sin conexión"
     },
     "dropzone": {
-        "title": "Suelta los PDF aqui",
-        "description": "Arrastra o haz clic para buscar."
+        "title": "Suelta PDF e imágenes aquí",
+        "description": "Arrastra o haz clic para buscar.",
+        "formats": "Compatible con PDF, JPG, PNG, WebP, GIF y BMP"
     },
     "list": {
         "title": "Archivos a unir",
         "fileName": "Nombre",
-        "pages": "Paginas",
-        "order": "Orden"
+        "pages": "Páginas",
+        "pagesShort": "págs",
+        "files": "archivos",
+        "order": "Orden",
+        "preview": "Vista previa",
+        "actions": "Acciones",
+        "dragHint": "Arrastra para reordenar.",
+        "cropped": "recortado",
+        "moveUp": "Subir",
+        "moveDown": "Bajar",
+        "remove": "Eliminar"
+    },
+    "crop": {
+        "title": "Recortar imagen",
+        "ratio": "Proporción:",
+        "free": "Libre",
+        "rotateLeft": "Girar a la izquierda",
+        "rotateRight": "Girar a la derecha",
+        "flipH": "Voltear horizontal",
+        "flipV": "Voltear vertical",
+        "reset": "Restablecer",
+        "apply": "Aplicar recorte"
     },
     "confirm": {
-        "clearTitle": "Borrar todo?",
-        "clearMessage": "Esto eliminara todos los PDF de la lista.",
-        "confirm": "Si, borrar",
+        "clearTitle": "¿Borrar todo?",
+        "clearMessage": "Esto eliminará todos los archivos de la lista.",
+        "confirm": "Sí, borrar",
         "cancel": "Cancelar"
     },
     "toast": {
-        "merged": "PDFs fusionados con exito!",
-        "error": "Error al fusionar",
-        "added": "Archivo anadido"
+        "merged": "¡Combinado con éxito!",
+        "merging": "Combinando...",
+        "error": "Error al combinar",
+        "added": "Archivo añadido",
+        "cropped": "Imagen recortada",
+        "unsupported": "Tipo de archivo no compatible",
+        "previewError": "No se pudo cargar la vista previa"
     },
     "footer": {
         "rights": "Todos los derechos reservados."

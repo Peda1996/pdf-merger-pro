@@ -9,13 +9,18 @@
     "settings": {
         "title": "Merge Options",
         "outputName": "Output Filename",
-        "mergeAction": "Merge PDFs",
-        "hint": "Add at least 2 files to merge."
+        "mergeAction": "Merge Files",
+        "hint": "Add at least 2 files to merge.",
+        "imagePageSize": "Image page size",
+        "pageFit": "Fit to image",
+        "pageA4": "A4 page",
+        "pageLetter": "Letter page",
+        "imagePageSizeHint": "Applies only to image pages."
     },
     "privacy": {
         "badge": "Your Device Only",
         "title": "100% Privacy Secure",
-        "description": "Your PDFs are processed EXCLUSIVELY on this device. Files NEVER leave your computer. No internet connection needed after page load.",
+        "description": "Your files are processed EXCLUSIVELY on this device. Files NEVER leave your computer. No internet connection needed after page load.",
         "whatDoesntHappen": "What DOESN'T happen:",
         "noUpload": "No Upload",
         "noServer": "No Server",
@@ -27,25 +32,50 @@
         "worksOffline": "Works Offline"
     },
     "dropzone": {
-        "title": "Drop PDF files here",
-        "description": "Drag & drop files or click to browse."
+        "title": "Drop PDFs & images here",
+        "description": "Drag & drop files or click to browse.",
+        "formats": "Supports PDF, JPG, PNG, WebP, GIF & BMP"
     },
     "list": {
         "title": "Files to Merge",
         "fileName": "File Name",
         "pages": "Pages",
-        "order": "Order"
+        "pagesShort": "pages",
+        "files": "files",
+        "order": "Order",
+        "preview": "Preview",
+        "actions": "Actions",
+        "dragHint": "Drag rows to reorder.",
+        "cropped": "cropped",
+        "moveUp": "Move up",
+        "moveDown": "Move down",
+        "remove": "Remove"
+    },
+    "crop": {
+        "title": "Crop image",
+        "ratio": "Ratio:",
+        "free": "Free",
+        "rotateLeft": "Rotate left",
+        "rotateRight": "Rotate right",
+        "flipH": "Flip horizontal",
+        "flipV": "Flip vertical",
+        "reset": "Reset",
+        "apply": "Apply crop"
     },
     "confirm": {
         "clearTitle": "Clear all files?",
-        "clearMessage": "This will remove all PDFs from the list.",
+        "clearMessage": "This will remove all files from the list.",
         "confirm": "Yes, clear all",
         "cancel": "Cancel"
     },
     "toast": {
-        "merged": "PDFs merged successfully!",
-        "error": "Error merging PDFs",
-        "added": "File added"
+        "merged": "Merged successfully!",
+        "merging": "Merging...",
+        "error": "Error merging files",
+        "added": "File added",
+        "cropped": "Image cropped",
+        "unsupported": "Unsupported file type",
+        "previewError": "Could not load preview"
     },
     "footer": {
         "rights": "All rights reserved."

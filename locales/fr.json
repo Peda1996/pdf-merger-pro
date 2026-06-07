@@ -9,45 +9,75 @@
     "settings": {
         "title": "Options",
         "outputName": "Nom du fichier",
-        "mergeAction": "Fusionner les PDF",
-        "hint": "Ajoutez au moins 2 fichiers."
+        "mergeAction": "Fusionner les fichiers",
+        "hint": "Ajoutez au moins 2 fichiers.",
+        "imagePageSize": "Taille de page image",
+        "pageFit": "Adapter à l'image",
+        "pageA4": "Page A4",
+        "pageLetter": "Page Letter",
+        "imagePageSizeHint": "S'applique uniquement aux pages image."
     },
     "privacy": {
-        "badge": "Votre Appareil Uniquement",
+        "badge": "Votre appareil uniquement",
         "title": "100% Confidentiel",
-        "description": "Vos PDFs sont traites EXCLUSIVEMENT sur cet appareil. Les fichiers ne quittent JAMAIS votre ordinateur. Aucune connexion Internet requise apres le chargement.",
+        "description": "Vos fichiers sont traités EXCLUSIVEMENT sur cet appareil. Les fichiers ne quittent JAMAIS votre ordinateur. Aucune connexion Internet requise après le chargement.",
         "whatDoesntHappen": "Ce qui NE SE PASSE PAS:",
-        "noUpload": "Pas de Telechargement",
-        "noServer": "Pas de Serveur",
-        "noCloud": "Pas de Cloud",
-        "noTracking": "Pas de Suivi",
+        "noUpload": "Pas de téléchargement",
+        "noServer": "Pas de serveur",
+        "noCloud": "Pas de cloud",
+        "noTracking": "Pas de suivi",
         "whatHappens": "Ce qui SE PASSE:",
-        "localProcessing": "Traitement Local",
-        "staysOnDevice": "Reste sur l'Appareil",
-        "worksOffline": "Fonctionne Hors Ligne"
+        "localProcessing": "Traitement local",
+        "staysOnDevice": "Reste sur l'appareil",
+        "worksOffline": "Fonctionne hors ligne"
     },
     "dropzone": {
-        "title": "Deposez les PDF ici",
-        "description": "Glissez-deposez ou cliquez."
+        "title": "Déposez PDF et images ici",
+        "description": "Glissez-déposez ou cliquez.",
+        "formats": "Prend en charge PDF, JPG, PNG, WebP, GIF et BMP"
     },
     "list": {
-        "title": "Fichiers a fusionner",
+        "title": "Fichiers à fusionner",
         "fileName": "Nom du fichier",
         "pages": "Pages",
-        "order": "Ordre"
+        "pagesShort": "pages",
+        "files": "fichiers",
+        "order": "Ordre",
+        "preview": "Aperçu",
+        "actions": "Actions",
+        "dragHint": "Glissez pour réorganiser.",
+        "cropped": "recadré",
+        "moveUp": "Monter",
+        "moveDown": "Descendre",
+        "remove": "Supprimer"
+    },
+    "crop": {
+        "title": "Recadrer l'image",
+        "ratio": "Ratio:",
+        "free": "Libre",
+        "rotateLeft": "Rotation gauche",
+        "rotateRight": "Rotation droite",
+        "flipH": "Miroir horizontal",
+        "flipV": "Miroir vertical",
+        "reset": "Réinitialiser",
+        "apply": "Appliquer"
     },
     "confirm": {
         "clearTitle": "Tout effacer ?",
-        "clearMessage": "Cela supprimera tous les PDF de la liste.",
+        "clearMessage": "Cela supprimera tous les fichiers de la liste.",
         "confirm": "Oui, effacer",
         "cancel": "Annuler"
     },
     "toast": {
-        "merged": "PDF fusionnes avec succes !",
+        "merged": "Fusion réussie !",
+        "merging": "Fusion en cours...",
         "error": "Erreur de fusion",
-        "added": "Fichier ajoute"
+        "added": "Fichier ajouté",
+        "cropped": "Image recadrée",
+        "unsupported": "Type de fichier non pris en charge",
+        "previewError": "Impossible de charger l'aperçu"
     },
     "footer": {
-        "rights": "Tous droits reserves."
+        "rights": "Tous droits réservés."
     }
 }

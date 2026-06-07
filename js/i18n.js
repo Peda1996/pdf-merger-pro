@@ -49,7 +49,17 @@ const i18n = {
             const text = this.t(el.dataset.i18n);
             if (text) el.textContent = text;
         });
+        document.querySelectorAll('[data-i18n-title]').forEach(el => {
+            const text = this.t(el.dataset.i18nTitle);
+            if (text) el.title = text;
+        });
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+            const text = this.t(el.dataset.i18nPlaceholder);
+            if (text) el.placeholder = text;
+        });
         const langSelect = document.getElementById('langSelect');
         if (langSelect) langSelect.value = this.currentLang;
+        // Notify listeners (e.g. to re-render dynamic lists with new labels)
+        document.dispatchEvent(new CustomEvent('i18n:changed', { detail: { lang: this.currentLang } }));
     }
 };

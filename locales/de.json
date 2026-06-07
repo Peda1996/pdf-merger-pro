@@ -9,13 +9,18 @@
     "settings": {
         "title": "Optionen",
         "outputName": "Dateiname",
-        "mergeAction": "PDFs zusammenfugen",
-        "hint": "Mindestens 2 Dateien hinzufugen."
+        "mergeAction": "Dateien zusammenfügen",
+        "hint": "Mindestens 2 Dateien hinzufügen.",
+        "imagePageSize": "Bild-Seitengröße",
+        "pageFit": "An Bild anpassen",
+        "pageA4": "A4-Seite",
+        "pageLetter": "Letter-Seite",
+        "imagePageSizeHint": "Gilt nur für Bildseiten."
     },
     "privacy": {
-        "badge": "Nur auf Ihrem Gerat",
+        "badge": "Nur auf Ihrem Gerät",
         "title": "100% Datenschutz",
-        "description": "Ihre PDFs werden AUSSCHLIESSLICH auf diesem Gerat verarbeitet. Dateien verlassen NIEMALS Ihren Computer. Nach dem Laden der Seite ist keine Internetverbindung erforderlich.",
+        "description": "Ihre Dateien werden AUSSCHLIESSLICH auf diesem Gerät verarbeitet. Dateien verlassen NIEMALS Ihren Computer. Nach dem Laden der Seite ist keine Internetverbindung erforderlich.",
         "whatDoesntHappen": "Was NICHT passiert:",
         "noUpload": "Kein Upload",
         "noServer": "Kein Server",
@@ -23,29 +28,54 @@
         "noTracking": "Kein Tracking",
         "whatHappens": "Was passiert:",
         "localProcessing": "Lokale Verarbeitung",
-        "staysOnDevice": "Bleibt auf Gerat",
-        "worksOffline": "Funktioniert Offline"
+        "staysOnDevice": "Bleibt auf dem Gerät",
+        "worksOffline": "Funktioniert offline"
     },
     "dropzone": {
-        "title": "PDFs hier ablegen",
-        "description": "Dateien ziehen oder klicken."
+        "title": "PDFs & Bilder hier ablegen",
+        "description": "Dateien ziehen oder klicken.",
+        "formats": "Unterstützt PDF, JPG, PNG, WebP, GIF & BMP"
     },
     "list": {
         "title": "Dateiliste",
         "fileName": "Dateiname",
         "pages": "Seiten",
-        "order": "Reihenfolge"
+        "pagesShort": "Seiten",
+        "files": "Dateien",
+        "order": "Reihenfolge",
+        "preview": "Vorschau",
+        "actions": "Aktionen",
+        "dragHint": "Zum Sortieren ziehen.",
+        "cropped": "zugeschnitten",
+        "moveUp": "Nach oben",
+        "moveDown": "Nach unten",
+        "remove": "Entfernen"
+    },
+    "crop": {
+        "title": "Bild zuschneiden",
+        "ratio": "Verhältnis:",
+        "free": "Frei",
+        "rotateLeft": "Links drehen",
+        "rotateRight": "Rechts drehen",
+        "flipH": "Horizontal spiegeln",
+        "flipV": "Vertikal spiegeln",
+        "reset": "Zurücksetzen",
+        "apply": "Zuschnitt übernehmen"
     },
     "confirm": {
-        "clearTitle": "Alles loschen?",
-        "clearMessage": "Dies entfernt alle PDFs aus der Liste.",
-        "confirm": "Ja, loschen",
+        "clearTitle": "Alles löschen?",
+        "clearMessage": "Dies entfernt alle Dateien aus der Liste.",
+        "confirm": "Ja, löschen",
         "cancel": "Abbrechen"
     },
     "toast": {
-        "merged": "PDFs erfolgreich zusammengefugt!",
-        "error": "Fehler beim Zusammenfugen",
-        "added": "Datei hinzugefugt"
+        "merged": "Erfolgreich zusammengefügt!",
+        "merging": "Wird zusammengefügt...",
+        "error": "Fehler beim Zusammenfügen",
+        "added": "Datei hinzugefügt",
+        "cropped": "Bild zugeschnitten",
+        "unsupported": "Nicht unterstützter Dateityp",
+        "previewError": "Vorschau konnte nicht geladen werden"
     },
     "footer": {
         "rights": "Alle Rechte vorbehalten."

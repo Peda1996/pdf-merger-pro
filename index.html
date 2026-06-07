@@ -17,6 +17,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
     <!-- FileSaver for downloads -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <!-- pdf.js for client-side PDF previews -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <!-- Cropper.js for client-side image cropping -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
 
     <!-- Custom Styles -->
     <link rel="stylesheet" href="css/styles.css">
@@ -100,6 +105,22 @@
                         </div>
                     </div>
 
+                    <!-- Image Page Size (only relevant when images are present) -->
+                    <div id="imageOptions" class="mb-5 hidden">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" data-i18n="settings.imagePageSize">Image page size</label>
+                        <div class="relative">
+                            <select id="imagePageSize" class="appearance-none w-full bg-gray-50 dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block p-2.5 pr-8 cursor-pointer">
+                                <option value="fit" data-i18n="settings.pageFit">Fit to image</option>
+                                <option value="a4" data-i18n="settings.pageA4">A4 page</option>
+                                <option value="letter" data-i18n="settings.pageLetter">Letter page</option>
+                            </select>
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </div>
+                        </div>
+                        <p class="mt-1 text-xs text-gray-400 dark:text-gray-500" data-i18n="settings.imagePageSizeHint">Applies only to image pages.</p>
+                    </div>
+
                     <!-- Merge Action -->
                     <button id="mergeBtn" disabled class="w-full py-3.5 px-4 bg-red-600 hover:bg-red-700 disabled:bg-gray-300 dark:disabled:bg-slate-700 disabled:cursor-not-allowed text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 group">
                         <svg class="w-5 h-5 group-hover:scale-110 transition-transform" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
@@ -178,15 +199,16 @@
 
                 <!-- Drop Zone -->
                 <div id="dropZone" class="drop-zone bg-white dark:bg-slate-800 rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer min-h-[250px] relative group">
-                    <input type="file" id="fileInput" multiple accept=".pdf" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" aria-label="Select PDFs">
+                    <input type="file" id="fileInput" multiple accept=".pdf,image/jpeg,image/png,image/webp,image/gif,image/bmp" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" aria-label="Select PDFs and images">
 
                     <div class="pointer-events-none transition-transform group-hover:scale-110 duration-300 mb-6 p-5 bg-red-50 dark:bg-red-900/30 rounded-full text-red-600 dark:text-red-400 shadow-sm">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><circle cx="10" cy="13" r="2"/><path d="m20 17-1.7-1.7a2 2 0 0 0-2.83 0L9 22"/></svg>
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white pointer-events-none mb-2" data-i18n="dropzone.title">Drop PDF files here</h3>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white pointer-events-none mb-2" data-i18n="dropzone.title">Drop PDFs & images here</h3>
                     <p class="text-gray-500 dark:text-gray-400 pointer-events-none text-sm max-w-xs mx-auto mb-3">
                         <span data-i18n="dropzone.description">Drag & drop files or click to browse.</span>
                     </p>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 pointer-events-none" data-i18n="dropzone.formats">Supports PDF, JPG, PNG, WebP, GIF & BMP</p>
                 </div>
 
                 <!-- File List Section -->
@@ -200,16 +222,20 @@
                     </div>
 
                     <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm overflow-hidden">
-                        <div class="grid grid-cols-12 bg-gray-50 dark:bg-slate-700/50 border-b border-gray-200 dark:border-slate-700 px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            <div class="col-span-1 text-center">#</div>
-                            <div class="col-span-6 md:col-span-5" data-i18n="list.fileName">File Name</div>
-                            <div class="col-span-3 md:col-span-2 text-center" data-i18n="list.pages">Pages</div>
-                            <div class="col-span-2 md:col-span-4 text-right" data-i18n="list.order">Order</div>
+                        <div class="flex items-center gap-3 bg-gray-50 dark:bg-slate-700/50 border-b border-gray-200 dark:border-slate-700 px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            <div class="w-6 text-center">#</div>
+                            <div class="w-11 text-center hidden sm:block" data-i18n="list.preview">Preview</div>
+                            <div class="flex-1" data-i18n="list.fileName">File Name</div>
+                            <div class="text-right" data-i18n="list.actions">Actions</div>
                         </div>
                         <div id="resultsList" class="divide-y divide-gray-100 dark:divide-slate-700 max-h-[500px] overflow-y-auto">
                             <!-- Items will be injected here -->
                         </div>
                     </div>
+                    <p class="mt-2 text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 9 2 12 5 15"/><polyline points="9 5 12 2 15 5"/><polyline points="15 19 12 22 9 19"/><polyline points="19 9 22 12 19 15"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/></svg>
+                        <span data-i18n="list.dragHint">Drag rows to reorder.</span>
+                    </p>
                 </div>
 
             </div>
@@ -249,30 +275,127 @@
         </div>
     </div>
 
+    <!-- Preview Modal -->
+    <div id="previewModal" class="preview-modal" role="dialog" aria-modal="true">
+        <div class="preview-content w-full max-w-4xl mx-4 max-h-[90vh] flex flex-col overflow-hidden">
+            <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-slate-700">
+                <h3 class="font-semibold text-gray-900 dark:text-white truncate pr-4" id="previewTitle">Preview</h3>
+                <button id="previewClose" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" aria-label="Close">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <div class="flex-1 overflow-auto bg-gray-100 dark:bg-slate-900 flex items-center justify-center p-4 min-h-[300px]">
+                <img id="previewImage" class="hidden max-w-full max-h-[70vh] object-contain shadow-lg rounded" alt="">
+                <canvas id="previewCanvas" class="hidden max-w-full shadow-lg bg-white rounded"></canvas>
+                <div id="previewLoading" class="hidden flex-col items-center gap-2 text-gray-400">
+                    <svg class="animate-spin h-8 w-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                </div>
+            </div>
+            <div class="flex items-center justify-between p-4 border-t border-gray-200 dark:border-slate-700 gap-3">
+                <div id="pdfNav" class="hidden items-center gap-2">
+                    <button id="pdfPrev" class="p-2 text-gray-500 hover:text-gray-800 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors" aria-label="Previous page">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                    </button>
+                    <span id="pdfPageInfo" class="text-sm font-mono text-gray-600 dark:text-gray-300 min-w-[60px] text-center">1 / 1</span>
+                    <button id="pdfNext" class="p-2 text-gray-500 hover:text-gray-800 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors" aria-label="Next page">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                </div>
+                <div class="flex-1"></div>
+                <button id="previewCropBtn" class="hidden items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></svg>
+                    <span data-i18n="crop.title">Crop image</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Crop Modal -->
+    <div id="cropModal" class="preview-modal" role="dialog" aria-modal="true">
+        <div class="preview-content w-full max-w-4xl mx-4 max-h-[95vh] flex flex-col overflow-hidden">
+            <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-slate-700">
+                <h3 class="font-semibold text-gray-900 dark:text-white" data-i18n="crop.title">Crop image</h3>
+                <button id="cropClose" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" aria-label="Close">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+
+            <!-- Toolbar -->
+            <div class="flex flex-wrap items-center gap-2 p-3 border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900/50">
+                <div class="flex items-center gap-1" id="aspectGroup">
+                    <span class="text-xs text-gray-500 dark:text-gray-400 mr-1 hidden sm:inline" data-i18n="crop.ratio">Ratio:</span>
+                    <button class="aspect-btn active" data-ratio="free" data-i18n="crop.free">Free</button>
+                    <button class="aspect-btn" data-ratio="1">1:1</button>
+                    <button class="aspect-btn" data-ratio="1.3333">4:3</button>
+                    <button class="aspect-btn" data-ratio="1.7778">16:9</button>
+                    <button class="aspect-btn" data-ratio="0.7071">A4</button>
+                </div>
+                <div class="w-px h-6 bg-gray-300 dark:bg-slate-600 mx-1"></div>
+                <button id="rotateLeft" class="crop-tool-btn" data-i18n-title="crop.rotateLeft" title="Rotate left">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v6h6"/><path d="M3 8a9 9 0 1 0 2.5-5.5L3 8"/></svg>
+                </button>
+                <button id="rotateRight" class="crop-tool-btn" data-i18n-title="crop.rotateRight" title="Rotate right">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"/><path d="M21 8a9 9 0 1 0-2.5-5.5L21 8"/></svg>
+                </button>
+                <button id="flipH" class="crop-tool-btn" data-i18n-title="crop.flipH" title="Flip horizontal">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M16 7l4 5-4 5"/><path d="M8 7l-4 5 4 5"/></svg>
+                </button>
+                <button id="flipV" class="crop-tool-btn" data-i18n-title="crop.flipV" title="Flip vertical">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18"/><path d="M7 8l5-4 5 4"/><path d="M7 16l5 4 5-4"/></svg>
+                </button>
+                <div class="w-px h-6 bg-gray-300 dark:bg-slate-600 mx-1"></div>
+                <button id="cropReset" class="crop-tool-btn px-3 text-sm font-medium" data-i18n="crop.reset">Reset</button>
+            </div>
+
+            <!-- Crop area -->
+            <div class="flex-1 overflow-hidden bg-gray-900 flex items-center justify-center min-h-[280px]" style="max-height:58vh">
+                <img id="cropImage" class="max-w-full block" alt="">
+            </div>
+
+            <!-- Footer -->
+            <div class="flex items-center justify-end p-4 border-t border-gray-200 dark:border-slate-700 gap-3">
+                <button id="cropCancel" class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-lg font-medium transition-colors" data-i18n="confirm.cancel">Cancel</button>
+                <button id="cropApply" class="flex items-center gap-2 px-4 py-2 text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg font-medium transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span data-i18n="crop.apply">Apply crop</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- List Item Template -->
     <template id="listItemTemplate">
-        <div class="grid grid-cols-12 px-4 py-3 items-center hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors group">
-            <div class="col-span-1 text-center font-mono text-xs text-gray-400 index-number">1</div>
-            <div class="col-span-6 md:col-span-5 flex items-center gap-3 overflow-hidden">
-                <div class="w-8 h-8 rounded bg-red-100 dark:bg-red-900/20 flex items-center justify-center flex-shrink-0 text-red-600 dark:text-red-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                </div>
-                <div class="min-w-0">
-                    <p class="text-sm font-medium text-gray-900 dark:text-white truncate file-name">doc.pdf</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 truncate file-size">2.4MB</p>
-                </div>
+        <div class="file-item flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors group" draggable="true">
+            <div class="w-6 text-center font-mono text-xs text-gray-400 index-number cursor-grab select-none" title="Drag to reorder">1</div>
+
+            <!-- Thumbnail / Preview trigger -->
+            <button class="thumb-btn relative w-11 h-11 rounded-md overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-slate-700 flex items-center justify-center border border-gray-200 dark:border-slate-600 hover:ring-2 hover:ring-red-400 transition-all" title="Preview">
+                <img class="thumb-img w-full h-full object-cover hidden" alt="">
+                <span class="thumb-spinner hidden"><svg class="animate-spin h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg></span>
+                <span class="thumb-icon text-red-500 dark:text-red-400"></span>
+            </button>
+
+            <!-- Name + meta -->
+            <div class="min-w-0 flex-1">
+                <p class="text-sm font-medium text-gray-900 dark:text-white truncate file-name">doc.pdf</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 truncate file-meta">PDF</p>
             </div>
-            <div class="col-span-3 md:col-span-2 text-center text-xs font-mono text-gray-600 dark:text-gray-300 file-pages">
-                ...
-            </div>
-            <div class="col-span-2 md:col-span-4 text-right flex justify-end gap-1">
+
+            <!-- Actions -->
+            <div class="flex items-center gap-0.5 flex-shrink-0">
+                <button class="preview-btn p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-slate-600 rounded" title="Preview">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+                <button class="crop-btn p-1.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-slate-600 rounded" title="Crop image">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></svg>
+                </button>
                 <button class="up-btn p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-slate-600 rounded" title="Move Up">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
                 </button>
                 <button class="down-btn p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-slate-600 rounded" title="Move Down">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
                 </button>
-                <button class="delete-btn ml-2 p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded" title="Remove">
+                <button class="delete-btn p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded" title="Remove">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </button>
             </div>
