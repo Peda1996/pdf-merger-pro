@@ -983,6 +983,16 @@ function createTextEl(data) {
 
 // Editable box positioned over a recognized PDF text run. Only emitted at save
 // time if its text was actually changed.
+// A recognized box counts as changed if its text OR its position changed.
+function recognizedChanged(el) {
+    if (getAnnoText(el) !== el.dataset.orig) return true;
+    const { w: dw, h: dh } = editDisplaySize();
+    const curLeft = (parseFloat(el.style.left) || 0) / dw;
+    const curTop = (parseFloat(el.style.top) || 0) / dh;
+    return Math.abs(curLeft - parseFloat(el.dataset.origLeftPct)) > 0.003 ||
+        Math.abs(curTop - parseFloat(el.dataset.origTopPct)) > 0.003;
+}
+
 function createRecognizedTextEl(t, dw, dh, ed) {
     const useEdit = ed && ed.text != null;
     const el = document.createElement('div');
@@ -997,6 +1007,8 @@ function createRecognizedTextEl(t, dw, dh, ed) {
     el.dataset.woTopPct = t.woTopPct;
     el.dataset.woWPct = t.woWPct;
     el.dataset.woHPct = t.woHPct;
+    el.dataset.origLeftPct = t.leftPct;   // original position, to detect a move-only edit
+    el.dataset.origTopPct = t.topPct;
     el.textContent = useEdit ? ed.text : t.str;
     el.style.left = ((useEdit ? ed.leftPct : t.leftPct) * dw) + 'px';
     el.style.top = ((useEdit ? ed.topPct : t.topPct) * dh) + 'px';
@@ -1004,7 +1016,7 @@ function createRecognizedTextEl(t, dw, dh, ed) {
     el.style.color = (useEdit && ed.color) ? ed.color : '#000000';
     wireAnnoDrag(el);
     el.addEventListener('input', () => {
-        el.classList.toggle('anno-changed', getAnnoText(el) !== el.dataset.orig);
+        el.classList.toggle('anno-changed', recognizedChanged(el));
     });
     editOverlay.appendChild(el);
     return el;
@@ -1054,7 +1066,11 @@ function wireAnnoDrag(el) {
                 el.style.top = (ot + dy) + 'px';
             }
         };
-        const onUp = () => { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); };
+        const onUp = () => {
+            document.removeEventListener('mousemove', onMove);
+            document.removeEventListener('mouseup', onUp);
+            if (moved && el.dataset.recognized === '1') el.classList.toggle('anno-changed', recognizedChanged(el));
+        };
         document.addEventListener('mousemove', onMove);
         document.addEventListener('mouseup', onUp);
     });
@@ -1106,8 +1122,8 @@ function serializeEditPage() {
         const left = parseFloat(el.style.left) || 0;
         const top = parseFloat(el.style.top) || 0;
         if (el.dataset.recognized === '1') {
+            if (!recognizedChanged(el)) return; // unchanged (text and position) → keep original glyphs
             const text = getAnnoText(el);
-            if (text === el.dataset.orig) return; // unchanged → keep original PDF glyphs
             edits[el.dataset.idx] = {
                 text,
                 leftPct: left / dw, topPct: top / dh,
