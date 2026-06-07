@@ -47,6 +47,7 @@
         "actions": "Actions",
         "dragHint": "Drag rows to reorder.",
         "cropped": "cropped",
+        "edited": "edited",
         "moveUp": "Move up",
         "moveDown": "Move down",
         "remove": "Remove"

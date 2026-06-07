@@ -237,8 +237,9 @@ async function addPdf(file) {
         thumb: null
     };
     appFiles.push(item);
-    // Generate a preview thumbnail (best-effort; merge does not depend on it)
-    try { item.thumb = await generatePdfThumb(buffer); } catch (e) { console.warn('PDF thumb failed', e); }
+    // Generate a preview thumbnail (best-effort; merge does not depend on it).
+    // Timeout guards against pdf.js render stalling when the tab is backgrounded.
+    try { item.thumb = await withTimeout(generatePdfThumb(buffer), 10000, null); } catch (e) { console.warn('PDF thumb failed', e); }
 }
 
 async function addImage(file) {
@@ -498,12 +499,14 @@ function renderItem(file, index) {
     const delBtn = clone.querySelector('.delete-btn');
 
     thumbImg.setAttribute('draggable', 'false');
-    if (!isEditable(file)) editBtn.classList.add('hidden'); // PDF editing not yet supported
+    if (!isEditable(file)) editBtn.classList.add('hidden');
+
+    const editedTag = file.edited ? ` · ${i18n.t('list.edited')}` : '';
 
     if (file.type === 'image') {
         const dims = `${file.width}×${file.height}`;
         const croppedTag = file.cropped ? ` · ${i18n.t('list.cropped')}` : '';
-        meta.textContent = `${imgTypeLabel(file.mimeType)} · ${dims} · ${file.size}${croppedTag}`;
+        meta.textContent = `${imgTypeLabel(file.mimeType)} · ${dims} · ${file.size}${croppedTag}${editedTag}`;
         thumbImg.src = file.currentSrc;
         thumbImg.classList.remove('hidden');
         thumbImg.classList.toggle('has-alpha', file.mimeType === 'image/png');
@@ -511,7 +514,7 @@ function renderItem(file, index) {
         cropBtn.title = i18n.t('crop.title');
     } else if (file.type === 'docx' || file.type === 'pptx') {
         const label = file.type === 'docx' ? 'DOCX' : 'PPTX';
-        meta.textContent = `${label} · ${file.pageCount} ${i18n.t('list.pagesShort')} · ${file.size}`;
+        meta.textContent = `${label} · ${file.pageCount} ${i18n.t('list.pagesShort')} · ${file.size}${editedTag}`;
         cropBtn.classList.add('hidden'); // no cropping for documents
         if (file.thumb) {
             thumbImg.src = file.thumb;
@@ -521,7 +524,7 @@ function renderItem(file, index) {
             thumbIcon.innerHTML = file.type === 'docx' ? DOCX_ICON : PPTX_ICON;
         }
     } else {
-        meta.textContent = `PDF · ${file.pageCount} ${i18n.t('list.pagesShort')} · ${file.size}`;
+        meta.textContent = `PDF · ${file.pageCount} ${i18n.t('list.pagesShort')} · ${file.size}${editedTag}`;
         cropBtn.classList.add('hidden'); // no cropping for PDFs
         if (file.thumb) {
             thumbImg.src = file.thumb;
@@ -794,12 +797,12 @@ function closeCrop() {
 
 // ---------- Content editor (text + whiteout overlays) ----------
 
-// Which file types currently support the overlay editor.
+// Which file types support the overlay editor.
 function isEditable(file) {
-    return file.type === 'image' || file.type === 'docx' || file.type === 'pptx';
+    return file.type === 'image' || file.type === 'docx' || file.type === 'pptx' || file.type === 'pdf';
 }
 
-function openEditor(index) {
+async function openEditor(index) {
     const file = appFiles[index];
     if (!file || !isEditable(file)) return;
     editFileId = file.id;
@@ -807,17 +810,66 @@ function openEditor(index) {
 
     if (file.type === 'image') {
         editPages = [{ src: file.currentSrc, annos: [] }];
-    } else {
+    } else if (file.type === 'docx' || file.type === 'pptx') {
         editPages = file.pages.map(p => ({ src: p.png, annos: [] }));
+    } else if (file.type === 'pdf') {
+        // Render pages to images for display only; annotations stay as data
+        // and are drawn onto the real vector page at merge time (lossless).
+        document.body.style.cursor = 'wait';
+        showToast(i18n.t('toast.converting'), 'info');
+        try {
+            editPages = await withTimeout(renderPdfPagesForEdit(file.buffer), 30000, null);
+        } catch (e) {
+            console.error('PDF render for edit failed', e);
+            editPages = null;
+        }
+        document.body.style.cursor = 'default';
+        if (!editPages || !editPages.length) {
+            showToast(i18n.t('toast.previewError'), 'error');
+            return;
+        }
     }
-    editPageIndex = 0;
 
+    // Restore previously saved annotations (PDF keeps them as data)
+    if (file.annotations) {
+        editPages.forEach((pg, i) => {
+            if (file.annotations[i]) pg.annos = file.annotations[i].map(a => Object.assign({}, a));
+        });
+    }
+
+    editPageIndex = 0;
     document.getElementById('editTitle').textContent = file.name;
     editModal.classList.add('active');
     const multi = editPages.length > 1;
     editNav.classList.toggle('hidden', !multi);
     editNav.classList.toggle('flex', multi);
     showEditPage(0);
+}
+
+// Render every PDF page to an image (display only) for the editor.
+async function renderPdfPagesForEdit(buffer) {
+    if (!window.pdfjsLib) throw new Error('pdf.js not loaded');
+    const pdf = await pdfjsLib.getDocument({ data: buffer.slice(0) }).promise;
+    const pages = [];
+    try {
+        for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const base = page.getViewport({ scale: 1 });
+            const scale = Math.min(2, 1100 / base.width);
+            const viewport = page.getViewport({ scale });
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.ceil(viewport.width);
+            canvas.height = Math.ceil(viewport.height);
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            await page.render({ canvasContext: ctx, viewport }).promise;
+            pages.push({ src: canvas.toDataURL('image/jpeg', 0.85), annos: [] });
+        }
+    } finally {
+        pdf.destroy();
+    }
+    return pages;
 }
 
 function showEditPage(i) {
@@ -977,6 +1029,19 @@ async function applyEdits() {
     const file = appFiles.find(f => f.id === editFileId);
     if (!file) { closeEditor(); return; }
 
+    // PDF: keep annotations as data and draw them as real vector objects at
+    // merge time (no rasterization, text stays crisp/selectable).
+    if (file.type === 'pdf') {
+        const ann = {};
+        editPages.forEach((pg, i) => { if (pg.annos && pg.annos.length) ann[i] = pg.annos; });
+        file.annotations = Object.keys(ann).length ? ann : null;
+        file.edited = !!file.annotations;
+        closeEditor();
+        renderList();
+        showToast(i18n.t('toast.edited'), 'success');
+        return;
+    }
+
     const isJpeg = file.type === 'image' && file.mimeType === 'image/jpeg';
     const out = [];
     for (const pg of editPages) {
@@ -1053,12 +1118,19 @@ async function mergePDFs() {
     try {
         const mergedPdf = await PDFLib.PDFDocument.create();
         const mode = imagePageSize.value;
+        let annoFont = null; // Helvetica, embedded lazily for PDF annotations
 
         for (const file of appFiles) {
             if (file.type === 'pdf') {
                 const pdf = await PDFLib.PDFDocument.load(file.buffer, { ignoreEncryption: true });
                 const pages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
-                pages.forEach(p => mergedPdf.addPage(p));
+                for (let idx = 0; idx < pages.length; idx++) {
+                    mergedPdf.addPage(pages[idx]);
+                    if (file.annotations && file.annotations[idx]) {
+                        if (!annoFont) annoFont = await mergedPdf.embedFont(PDFLib.StandardFonts.Helvetica);
+                        drawAnnotationsOnPdfPage(pages[idx], file.annotations[idx], annoFont);
+                    }
+                }
             } else if (file.type === 'docx' || file.type === 'pptx') {
                 // Each rendered document page/slide is embedded at its own size
                 for (const pg of file.pages) {
@@ -1089,6 +1161,58 @@ async function mergePDFs() {
         btn.disabled = false;
         renderList();
     }
+}
+
+// Draw stored annotations onto a real (vector) PDF page.
+// pdf-lib's origin is bottom-left; the editor stores top-left percentages.
+function drawAnnotationsOnPdfPage(page, annos, font) {
+    const W = page.getWidth();
+    const H = page.getHeight();
+    // Whiteouts first (cover), then text on top — same layering as the editor
+    annos.filter(a => a.type === 'whiteout').forEach(a => {
+        page.drawRectangle({
+            x: a.leftPct * W,
+            y: H - (a.topPct + a.hPct) * H,
+            width: a.wPct * W,
+            height: a.hPct * H,
+            color: PDFLib.rgb(1, 1, 1)
+        });
+    });
+    annos.filter(a => a.type === 'text').forEach(a => {
+        const size = a.fontPct * H;
+        const [r, g, b] = parseColorRGB01(a.color);
+        const padX = size * 0.2, padY = size * 0.12;
+        let topFromTop = a.topPct * H + padY; // top edge of text line, measured from page top
+        String(a.text || '').split('\n').forEach(line => {
+            const text = sanitizePdfText(line);
+            if (text) {
+                page.drawText(text, {
+                    x: a.leftPct * W + padX,
+                    y: H - topFromTop - size * 0.8, // convert top edge → baseline
+                    size: size,
+                    font: font,
+                    color: PDFLib.rgb(r, g, b)
+                });
+            }
+            topFromTop += size * 1.25;
+        });
+    });
+}
+
+function parseColorRGB01(color) {
+    if (!color) return [0, 0, 0];
+    if (color[0] === '#') {
+        const h = color.length === 4 ? color.slice(1).split('').map(c => c + c).join('') : color.slice(1);
+        return [parseInt(h.slice(0, 2), 16) / 255, parseInt(h.slice(2, 4), 16) / 255, parseInt(h.slice(4, 6), 16) / 255];
+    }
+    const m = color.match(/\d+(?:\.\d+)?/g);
+    if (m && m.length >= 3) return [(+m[0]) / 255, (+m[1]) / 255, (+m[2]) / 255];
+    return [0, 0, 0];
+}
+
+// StandardFonts.Helvetica is WinAnsi-only; strip characters it can't encode.
+function sanitizePdfText(s) {
+    return String(s).replace(/[^\x20-\x7E\xA0-\xFF]/g, '');
 }
 
 function addImagePage(pdf, img, mode) {
@@ -1163,6 +1287,14 @@ function loadImage(src) {
         img.onerror = () => reject(new Error('Image load failed'));
         img.src = src;
     });
+}
+
+// Resolve with `fallback` if `promise` doesn't settle within `ms`. Guards against
+// pdf.js canvas rendering stalling in background/hidden tabs.
+function withTimeout(promise, ms, fallback) {
+    let timer;
+    const timeout = new Promise((resolve) => { timer = setTimeout(() => resolve(fallback), ms); });
+    return Promise.race([Promise.resolve(promise).finally(() => clearTimeout(timer)), timeout]);
 }
 
 function canvasConvert(src, w, h, mime) {

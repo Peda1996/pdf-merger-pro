@@ -47,6 +47,7 @@
         "actions": "Azioni",
         "dragHint": "Trascina per riordinare.",
         "cropped": "ritagliato",
+        "edited": "modificato",
         "moveUp": "Sposta su",
         "moveDown": "Sposta giù",
         "remove": "Rimuovi"

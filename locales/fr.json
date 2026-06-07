@@ -47,6 +47,7 @@
         "actions": "Actions",
         "dragHint": "Glissez pour réorganiser.",
         "cropped": "recadré",
+        "edited": "modifié",
         "moveUp": "Monter",
         "moveDown": "Descendre",
         "remove": "Supprimer"
