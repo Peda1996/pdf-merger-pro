@@ -50,9 +50,17 @@ d.add_paragraph("Erster Absatz im Word-Dokument."); d.add_paragraph("Zweiter Abs
 d.save(docx_path)
 
 from pptx import Presentation
+from pptx.util import Inches
+from pptx.dml.color import RGBColor as PRGB
+from pptx.enum.shapes import MSO_SHAPE
 pptx_path = os.path.join(tmp, "slides.pptx")
-prs = Presentation(); s = prs.slides.add_slide(prs.slide_layouts[0])
+prs = Presentation()
+s = prs.slides.add_slide(prs.slide_layouts[0])
 s.shapes.title.text = "Selenium Deck"; s.placeholders[1].text = "Untertitel"
+# slide 2 with a colored shape — regression guard: html2canvas dropped SVG shapes
+s2 = prs.slides.add_slide(prs.slide_layouts[6])
+box = s2.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(1), Inches(1), Inches(4), Inches(2))
+box.fill.solid(); box.fill.fore_color.rgb = PRGB(0x3B, 0x82, 0xF6); box.text_frame.text = "Phase 1"
 prs.save(pptx_path)
 print("test files in", tmp)
 
@@ -113,8 +121,8 @@ try:
                 "&& (img.src||'').startsWith('data:')?1:0;})")
     log("PDF thumbnail rendered (pdf.js)", thumbs[0] == 1, f"thumb[0]={thumbs[0]}")
     log("image thumbnail", thumbs[1] == 1, f"thumb[1]={thumbs[1]}")
-    log("DOCX thumbnail rendered (html2canvas)", thumbs[2] == 1, f"thumb[2]={thumbs[2]}")
-    log("PPTX thumbnail rendered (pptxjs)", thumbs[3] == 1, f"thumb[3]={thumbs[3]}")
+    log("DOCX thumbnail rendered", thumbs[2] == 1, f"thumb[2]={thumbs[2]}")
+    log("PPTX thumbnail rendered (pptxjs + modern-screenshot)", thumbs[3] == 1, f"thumb[3]={thumbs[3]}")
     log("totals shown", True, js("return document.getElementById('totalPageInfo').textContent"))
 
     # PDF text editor
@@ -152,6 +160,25 @@ try:
     driver.find_element(By.ID, "previewClose").click()
     time.sleep(0.3)
 
+    # PPTX shape slide must actually render its colored shapes (regression guard)
+    driver.find_element(By.CSS_SELECTOR, "#resultsList .file-item:nth-child(4) .preview-btn").click()
+    W.until(lambda dr: dr.execute_script("return document.getElementById('previewModal').classList.contains('active')"))
+    time.sleep(0.8)
+    js("document.getElementById('pdfNext').click()")  # go to slide 2 (the shape slide)
+    time.sleep(0.8)
+    colored = driver.execute_async_script("""
+      const cb=arguments[arguments.length-1];
+      const img=new Image();
+      img.onload=()=>{const c=document.createElement('canvas');c.width=img.naturalWidth;c.height=img.naturalHeight;
+        const x=c.getContext('2d');x.drawImage(img,0,0);const d=x.getImageData(0,0,c.width,c.height).data;let n=0;
+        for(let i=0;i<d.length;i+=4){if(Math.abs(d[i]-d[i+1])>25||Math.abs(d[i+1]-d[i+2])>25)n++;}cb(n);};
+      img.onerror=()=>cb(-1);
+      img.src=document.getElementById('previewImage').src;
+    """)
+    log("PPTX shape slide renders colored shapes (modern-screenshot/SVG)", colored > 1000, f"colored_px={colored}")
+    driver.find_element(By.ID, "previewClose").click()
+    time.sleep(0.3)
+
     # merge
     js("document.getElementById('outputFilename').value='selenium-merged';")
     driver.find_element(By.ID, "mergeBtn").click()
@@ -171,7 +198,8 @@ try:
             try: alltext += (p.extract_text() or "")
             except Exception: pass
         log("merged PDF downloaded", True, f"{os.path.basename(merged)} {os.path.getsize(merged)}B {npages} pages")
-        log("merged page count = 5", npages == 5, f"pages={npages}")
+        # PDF (2) + image (1) + DOCX (1) + PPTX (2) = 6
+        log("merged page count = 6", npages == 6, f"pages={npages}")
         log("edited PDF text 'GEAENDERT' present in output", "GEAENDERT" in alltext)
         log("DOCX content (rasterized -> no selectable text expected)", True, f"chars_extracted={len(alltext)}")
     else:

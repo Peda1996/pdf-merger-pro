@@ -286,7 +286,20 @@ async function addDocx(file) {
     });
 }
 
-// Render a .docx into an array of page images using docx-preview + html2canvas.
+// Rasterize a rendered page/slide element to a canvas. Prefers modern-screenshot
+// (renders SVG shapes that PPTXjs emits) and falls back to html2canvas.
+async function rasterizePage(el) {
+    if (window.modernScreenshot && window.modernScreenshot.domToCanvas) {
+        try {
+            return await window.modernScreenshot.domToCanvas(el, { scale: 2, backgroundColor: '#ffffff' });
+        } catch (e) {
+            console.warn('modern-screenshot failed, falling back to html2canvas', e);
+        }
+    }
+    return await window.html2canvas(el, { scale: 2, backgroundColor: '#ffffff', useCORS: true, logging: false });
+}
+
+// Render a .docx into an array of page images using docx-preview.
 // Note: pages are rasterized, so text in the final PDF is not selectable.
 async function renderDocxToPages(arrayBuffer) {
     if (!window.docx || !window.html2canvas) throw new Error('DOCX libraries not loaded');
@@ -313,14 +326,7 @@ async function renderDocxToPages(arrayBuffer) {
     for (const sec of sections) {
         const cssW = sec.offsetWidth || 794;
         const cssH = sec.offsetHeight || 1123;
-        const canvas = await window.html2canvas(sec, {
-            scale: 2,
-            backgroundColor: '#ffffff',
-            useCORS: true,
-            logging: false,
-            windowWidth: cssW,
-            windowHeight: cssH
-        });
+        const canvas = await rasterizePage(sec);
         pages.push({
             png: canvas.toDataURL('image/png'),
             wPt: cssW * 72 / 96,   // CSS px (96dpi) -> PDF points
@@ -398,14 +404,7 @@ async function renderPptxToPages(file) {
         for (const slide of slides) {
             const cssW = slide.offsetWidth || 960;
             const cssH = slide.offsetHeight || 540;
-            const canvas = await window.html2canvas(slide, {
-                scale: 2,
-                backgroundColor: '#ffffff',
-                useCORS: true,
-                logging: false,
-                windowWidth: cssW,
-                windowHeight: cssH
-            });
+            const canvas = await rasterizePage(slide);
             pages.push({
                 png: canvas.toDataURL('image/png'),
                 wPt: cssW * 72 / 96,

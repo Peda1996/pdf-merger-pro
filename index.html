@@ -31,7 +31,9 @@
     <script>window.__JSZip2 = window.JSZip; window.JSZip = window.__JSZip3; /* default to 3.x */</script>
     <!-- docx-preview for client-side Word (.docx) rendering (uses JSZip 3.x) -->
     <script src="https://cdn.jsdelivr.net/npm/docx-preview@0.3.5/dist/docx-preview.min.js"></script>
-    <!-- html2canvas to rasterize rendered Office pages into the PDF -->
+    <!-- Rasterizers for rendered Office pages: modern-screenshot (handles SVG shapes
+         from PPTXjs), html2canvas as fallback -->
+    <script src="https://cdn.jsdelivr.net/npm/modern-screenshot@4.6.7/dist/index.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <!-- jQuery + PPTXjs for client-side PowerPoint (.pptx) rendering (uses JSZip 2.x) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
